@@ -15,6 +15,6 @@ for (var env of Object.keys(process.env)) {
 		configs[key] = process.env[env];
 	}
 }
-logger.log('info', `configs: ${JSON.stringify(configs)}`);
+//logger.log('info', `configs: ${JSON.stringify(configs)}`);
 
 module.exports = configs;

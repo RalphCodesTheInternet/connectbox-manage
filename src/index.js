@@ -25,10 +25,13 @@ app.use(cookieSession({name: 'relaytrust',keys: ['81143184-d876-11eb-b8bc-0242ac
 app.put('/admin/api/auth', function(req,res) {
 	console.log(req.body);
 	if (req.body && req.body.password && auth(req.body.password)) {
+		logger.log('debug', `${req.method} ${req.originalUrl}: Authorized`);
 		req.session.username = "admin";
-		res.sendStatus(200);
+		response = {username:"admin"};
+		res.send(response)
 	}
 	else {
+		logger.log('debug', `${req.method} ${req.originalUrl}: FAILED`);
 		res.sendStatus(401);
 	}
 })
@@ -50,8 +53,9 @@ app.use('/admin/api', require('./routes/api.js'));
 function auth(password) {
 	try {
 		var authString = fs.readFileSync('/usr/local/connectbox/etc/basicauth','utf-8');
-		var checkPassword = execSync(`echo ${password} | openssl passwd -apr1 -salt CBOX2018 -stdin`);
-		if (checkPassword === authString) {
+		var checkPassword = execSync(`echo ${password} | openssl passwd -apr1 -salt CBOX2018 -stdin`).toString().replace('\n','');
+		//console.log(`--${authString}--${'admin:' + checkPassword}--`);
+		if ('admin:' + checkPassword === authString) {
 			return true;
 		}
 		else {

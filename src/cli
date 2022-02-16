@@ -1,0 +1,44 @@
+#!/usr/bin/node
+
+const
+	functions = require('./functions.js'),
+	usage = require('./usage.js');
+
+var args = process.argv;
+// Remove the first two arguments (interpreter + node program)
+args.shift(); // Remove /usr/bin/node
+args.shift(); // Remove path to script
+//console.log(args);
+
+var command = args[0];
+var key = args[1];
+var value = args[2];
+
+if (!command || command.toLowerCase() == 'help') {
+	console.log(usage.text);
+}
+else {
+	switch (command){
+		case 'get':
+			if (key.toLowerCase() === 'brand') {
+				console.log(functions.getBrand(value));
+			}
+			else {
+				console.log(functions.get[key]());		
+			}
+		break;
+		case 'set':
+			if (key.toLowerCase() === 'brand') {
+				var values = value.split('=');
+				var payload = {value:`${values[0]}=${values[1]}`};
+				console.log(functions.setBrand(payload));
+			}
+			else {
+				console.log(functions.set[key](value));		
+			}
+		break;
+		case 'do':
+				console.log(functions.do[key](value));		
+		break;
+	}
+}

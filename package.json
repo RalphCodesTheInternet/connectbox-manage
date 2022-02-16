@@ -21,11 +21,13 @@
     "express": "*",
     "express-session": "*",
     "file-type": "16.4.0",
+    "logger": "*",
     "moment": "*",
     "moment-timezone": "*",
     "nocache": "*",
     "request": "*",
     "swagger-ui-express": "*",
-    "uuid": "*"
-  }
+    "uuid": "*",
+    "winston": "*"
+  }  
 }
