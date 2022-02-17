@@ -25,6 +25,7 @@
     "moment": "*",
     "moment-timezone": "*",
     "nocache": "*",
+    "pm2":"*",
     "request": "*",
     "swagger-ui-express": "*",
     "uuid": "*",
