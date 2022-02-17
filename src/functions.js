@@ -161,6 +161,12 @@ doCommand.wipe = function(json) {
     }
 }
 
+//DICT:SET:securitykey (string): Update the Moodle and Phonehome security key for sync with Dashboard
+set.securitykey = function(json) {
+	setBrand({value:'server_authorization='+json.value});
+	execute(`sudo wget -O /tmp/download.mbz ${json.value} >/tmp/course-download.log 2>&1`);
+}
+
 //DICT:GET:brand: Get value from brand.txt.  Must include a value such as Image
 function getBrand(key) {
 	var brand = JSON.parse(fs.readFileSync('/usr/local/connectbox/brand.txt'));
