@@ -34,11 +34,11 @@ else {
 				console.log(functions.setBrand(payload));
 			}
 			else {
-				console.log(functions.set[key](value));		
+				console.log(functions.set[key]({value:value}));		
 			}
 		break;
 		case 'do':
-				console.log(functions.do[key](value));		
+				console.log(functions.doCommand[key]({value:value}));		
 		break;
 	}
 }

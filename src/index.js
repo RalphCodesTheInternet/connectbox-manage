@@ -12,6 +12,7 @@ const express = require('express'),
     Logger = require('./logger.js'),
     logger = new Logger(configs.logging);
 
+console.log(`Listening on port ${configs.port}`);
 app.listen(configs.port);
 app.use(cors());
 app.options('*', cors());

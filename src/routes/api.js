@@ -8,6 +8,11 @@ const express = require('express'),
 
 
 
+router.get('/do/:command', function doCommand(req,res) {
+	var data = {code:0,result: [functions.doCommand[req.params.command]()]};
+	logger.log('debug', `${req.method} ${req.originalUrl}: ${data.result[0]}`);
+	res.send(data);
+});
 
 router.get('/brand/:key', function get(req, res) {
 	var data = {code:0,result: [functions.getBrand(req.params.key)]};

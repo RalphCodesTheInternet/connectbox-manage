@@ -1,22 +1,38 @@
 const
     configs = require('./configs.js'),
 	{execSync}= require("child_process"),
-    fs = require('fs'),
+	{ exec } = require('child_process'),
+	fs = require('fs'),
     Logger = require('./logger.js'),
     logger = new Logger(configs.logging);
 
 var get = {};
 var set = {};
+var doCommand = {};
+
+// This provides the interface information for each wifi interface
+var wifi = {"accesspoint":"wlan1","client":"wlan0"};  // Defaults
+if (fs.existsSync('/usr/local/connectbox/wificonf.txt')) {
+	wifi.accesspoint = execute(`grep 'AccessPointIF' /usr/local/connectbox/wificonf.txt | cut -d"=" -f2`);
+	wifi.client = execute(`grep 'ClientIF' /usr/local/connectbox/wificonf.txt | cut -d"=" -f2`);
+}
 
 function auth (password) {
 	console.log(auth);
+}
+
+//DICT:SET:password (string): Set Web Access password
+set.password = function (json){
+	var hash = execute(`echo ${json.value} | openssl passwd -apr1 -salt CBOX2018 -stdin`)
+	fs.writeFileSync('/usr/local/connectbox/etc/basicauth',`admin:${hash.toString()}`);
+	return (true);
 }
 
 //DICT:GET:apssid: Access Point SSID
 get.apssid = function (){
 	return (execute(`grep '^ssid=' /etc/hostapd/hostapd.conf | cut -d"=" -f2`))
 }
-//DICT:SET:apssid: Access Point SSID
+//DICT:SET:apssid (string): Access Point SSID
 set.apssid = function (json){
 	return (execute(`sudo sed -i -e "/ssid=/ s/=.*/=\"${json.value}\"/" /etc/hostapd/hostapd.conf`))
 }
@@ -25,7 +41,7 @@ set.apssid = function (json){
 get.appassphrase = function (){
 	return (execute(`grep '^wpa_passphrase=' /etc/hostapd/hostapd.conf | cut -d"=" -f2`))
 }
-//DICT:SET:appassphrase: Access Point WPA passphrase
+//DICT:SET:appassphrase (string): Access Point WPA passphrase
 set.appassphrase = function (json){
 	return (execute(`sudo sed -i -e "/wpa_passphrase=/ s/=.*/=\"${json.value}\"/" /etc/hostapd/hostapd.conf`))
 }
@@ -34,7 +50,7 @@ set.appassphrase = function (json){
 get.apchannel = function (){
 	return (execute(`grep '^channel=' /etc/hostapd/hostapd.conf | cut -d"=" -f2`))
 }
-//DICT:SET:apchannel: Access Point Wi-Fi Channel
+//DICT:SET:apchannel (integer): Access Point Wi-Fi Channel
 set.apchannel = function (json){
 	return (execute(`sudo sed -i -e "/channel=/ s/=.*/=\"${json.value}\"/" /etc/hostapd/hostapd.conf`))
 }
@@ -43,7 +59,7 @@ set.apchannel = function (json){
 get.clientssid = function (){
 	return (execute(`grep 'ssid' /etc/wpa_supplicant/wpa_supplicant.conf | cut -d'"' -f2`))
 }
-//DICT:SET:clientssid: Client Wi-Fi SSID
+//DICT:SET:clientssid (string): Client Wi-Fi SSID
 set.clientssid = function (json){
 	return (execute(`sudo sed -i -e "/ssid=/ s/=.*/=\"${json.value}\"/" /etc/wpa_supplicant/wpa_supplicant.conf`))
 }
@@ -52,7 +68,7 @@ set.clientssid = function (json){
 get.clientpassphrase = function (){
 	return (execute(`grep 'psk' /etc/wpa_supplicant/wpa_supplicant.conf | cut -d'"' -f2`))
 }
-//DICT:SET:clientpassphrase: Client Wi-Fi WPA Passphrase
+//DICT:SET:clientpassphrase (string): Client Wi-Fi WPA Passphrase
 set.clientpassphrase = function (json){
 	return (execute(`sudo sed -i -e "/psk=/ s/=.*/=\"${json.value}\"/" /etc/wpa_supplicant/wpa_supplicant.conf`))
 }
@@ -61,15 +77,21 @@ set.clientpassphrase = function (json){
 get.clientcountry = function (){
 	return (execute(`grep 'country=' /etc/wpa_supplicant/wpa_supplicant.conf | cut -d"=" -f2`))
 }
-//DICT:SET:clientcountry: Client Wi-Fi Wi-Fi Country Support
+//DICT:SET:clientcountry(2 letter country code): Client Wi-Fi Wi-Fi Country Support
 set.clientcountry = function (json){
 	execute(`sudo sed -i -e "/country_code=/ s/=.*/=${json.value}/" /etc/hostapd/hostapd.conf`)
 	return (execute(`sudo sed -i -e "/country=/ s/=.*/=\"${json.value}\"/" /etc/wpa_supplicant/wpa_supplicant.conf`))
 }
 
+//DICT:SET:wifirestart(interface): Client Wi-Fi Wi-Fi Country Support
+set.wifirestart = function (json){
+	var interface = wifi[json.value];
+	return (execute(`sudo ifdown ${interface} && sudo ifup ${interface}`));
+}
+
 //DICT:GET:hostname: Box Hostname
 get.hostname = function (){
-	return (execute(`cat /etc/hostname`))
+	return (execute(`cat /etc/hostname`))  
 }
 //DICT:SET:hostname: Box Hostname
 set.hostname = function (json){
@@ -84,6 +106,59 @@ get.ismoodle = function() {
 	else {
 		return('0');
 	}
+}
+
+//DICT:DO:umountusb: Unmount USB for safe removal
+doCommand.unmountusb = function() {
+	return(execute(`sudo pumount /media/usb0`));
+}
+
+//DICT:DO:shutdown: Halt system
+doCommand.shutdown = function() {
+	return(execute(`sudo shutdown -t 1 -h`))
+}
+
+//DICT:DO:reboot: Reboot
+doCommand.reboot = function() {
+	return(execute(`sudo shutdown -t 1 -r`))
+}
+
+//DICT:SET:openwelldownload (URL): Download the file and install into OpenWell 
+set.openwelldownload = function(json) {
+	return(execute(`sudo /usr/bin/python /usr/local/connectbox/bin/lazyLoader.py ${json.value}`));
+}
+
+//DICT:DO:openwellusb: Trigger a loading of OpenWell content from USB (openwell.zip OR semi-structured media)
+doCommand.openwellusb = function() {
+	if (fs.existsSync('/media/usb0/openwell.zip')) {
+		exec(`scripts/openwellunzip.sh`);
+	}
+	else {
+		return(execute(`sudo python /usr/local/connectbox/bin/enhancedInterfaceUSBLoader.py`))
+	}
+}
+
+//DICT:SET:coursedownload (URL): Download the Moodle course and install 
+set.coursedownload = function(json) {
+	execute(`sudo wget -O /tmp/download.mbz ${json.value} >/tmp/course-download.log 2>&1`);
+	return(execute(`sudo -u www-data /usr/bin/php /var/www/moodle/admin/cli/restore_backup.php --file=/tmp/download.mbz --categoryid=1`));
+}
+
+//DICT:DO:courseusb: Trigger a loading of Moodle content (*.mbz) from USB
+doCommand.courseusb = function() {
+	execute(`sudo -u www-data /usr/bin/php /var/www/moodle/admin/cli/restore_courses_directory.php /media/usb0/`);
+	return true;
+}
+
+//DICT:DO:wipe (password): Erase SD Card -- password is wipethebox
+doCommand.wipe = function(json) {
+    if (json.value === 'wipethebox') {
+    	exec(`scripts/wipe.sh &`);
+	    return true;
+    }
+    else {
+    	return false;
+    }
 }
 
 //DICT:GET:brand: Get value from brand.txt.  Must include a value such as Image
@@ -123,6 +198,7 @@ module.exports = {
 	auth,
 	get,
 	set,
+	doCommand,
 	getBrand,
 	setBrand
 };
