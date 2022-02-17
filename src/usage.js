@@ -13,7 +13,7 @@ for (var row of dictionary.split('\n')) {
 }
 
 var text = 
-`Usage: <command> <key> <value>
+`Usage: connectboxmanage <command> <key> <value>
 	Commands:
 		- get
 		- set
@@ -25,6 +25,13 @@ ${usageTexts.get}
 ${usageTexts.set}
 		Actions to do:
 ${usageTexts.do}
+
+		Examples:
+			connectboxmanage get hostname
+			connectboxmanage get brand Image
+			connectboxmanage do reboot
+			connectboxmanage set hostname <new>
+			connectboxmanage set brand Image=<wwwpath>
 `;
 
 
