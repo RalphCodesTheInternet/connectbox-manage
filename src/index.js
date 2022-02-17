@@ -37,6 +37,11 @@ app.put('/admin/api/auth', function(req,res) {
 	}
 })
 
+app.get('/admin/api/logout', function(req,res) {
+	logger.log('debug', `${req.method} ${req.originalUrl}: Logged Out`);
+	req.session = null;
+})
+
 app.use(async function (req, res, next) {
 	if (!req.session.username) {
 		res.sendStatus(401);
