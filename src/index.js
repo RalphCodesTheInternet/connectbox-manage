@@ -12,6 +12,8 @@ const express = require('express'),
     Logger = require('./logger.js'),
     logger = new Logger(configs.logging);
 
+var chats = {};
+
 console.log(`Listening on port ${configs.port}`);
 app.listen(configs.port);
 app.use(cors());
@@ -41,6 +43,43 @@ app.get('/admin/api/logout', function(req,res) {
 	logger.log('debug', `${req.method} ${req.originalUrl}: Logged Out`);
 	req.session = null;
 	res.sendStatus(200);
+})
+
+app.get(['/chat','/chat/:lastMessage'], function(req,res) {
+	// Check for lastMessage value, otherwise, get all non expired messages
+	if (!req.params || !req.params.lastMessage) {
+		req.params={lastMessage:0};
+	}
+	var deleteTime = moment().valueOf() - (3 * 60 * 60 * 1000);  //Delete messages older than 3 hours
+	var deleteCount = 0; // Count the number of messages deleted just for logging
+	var chatArray = []; // Build this array for the response
+	for (var id of Object.keys(chats)) {
+		if (id < deleteTime) {
+			delete chats[id];
+			deleteCount++;
+		}
+		else {
+			if (id > req.params.lastMessage) {
+				chatArray.push(chats[id]);
+			}
+		}
+	}
+	logger.log('debug', `${req.method} ${req.originalUrl}: Sending ${chatArray.length} messages (Deleted ${deleteCount} messages since ${deleteTime})`);	
+	res.send(chatArray);
+})
+
+app.put('/chat', function (req,res) {
+	try {
+		var test = JSON.stringify(req.body);
+		req.body.timestamp = moment().unix();
+		chats[moment().valueOf()] = req.body;
+		console.log(chats);
+		res.sendStatus(200);
+	}
+	catch (err) {
+		logger.log('debug', `${req.method} ${req.originalUrl}: invalid chat json`);
+		res.sendStatus(500);
+	}
 })
 
 app.use(async function (req, res, next) {
