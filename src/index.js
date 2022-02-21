@@ -59,13 +59,18 @@ app.get(['/chat','/chat/:lastMessage'], function(req,res) {
 			deleteCount++;
 		}
 		else {
-			if (id > req.params.lastMessage) {
+			if (id / 1000 > req.params.lastMessage) {
 				chatArray.push(chats[id]);
 			}
 		}
 	}
-	logger.log('debug', `${req.method} ${req.originalUrl}: Sending ${chatArray.length} messages (Deleted ${deleteCount} messages since ${deleteTime})`);	
-	res.send(chatArray);
+	logger.log('debug', `${req.method} ${req.originalUrl}: Sending ${chatArray.length} messages (Deleted ${deleteCount} messages prior to ${deleteTime})`);	
+	if (chatArray.length > 0) {
+		res.send(chatArray);
+	}
+	else {
+		res.sendStatus(204);
+	}
 })
 
 app.put('/chat', function (req,res) {
@@ -73,7 +78,6 @@ app.put('/chat', function (req,res) {
 		var test = JSON.stringify(req.body);
 		req.body.timestamp = moment().unix();
 		chats[moment().valueOf()] = req.body;
-		console.log(chats);
 		res.sendStatus(200);
 	}
 	catch (err) {
