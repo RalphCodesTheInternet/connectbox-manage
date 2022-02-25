@@ -95,7 +95,14 @@ get.hostname = function (){
 }
 //DICT:SET:hostname: Box Hostname
 set.hostname = function (json){
-	//todo
+	fs.writeFileSync('/etc/hostname',`${json.value}`);  // set hostname
+	setBrand({value:`Brand=${json.value}`}); // set in brands.txt
+	execute(`sudo sed -i -e "/server_name / s/server_name .*/server_name learn.${json.value} learn.thewell learn.connectbox;/" /etc/nginx/sites-enabled/connectbox_moodle.conf`)
+	execute(`sudo sed -i -e "/server_name / s/server_name .*/server_name ${json.value} thewell connectbox;/" /etc/nginx/sites-enabled/connectbox_enhanced.conf`)
+	// The http://  value must be handled with \\\/\\\/ because it has to double escape the slashes due to regexp
+	execute(`sudo sed -i -e "/wwwroot / s/=.*/= 'http:\\\/\\\/${json.value}';/" /var/www/moodle/config.php`)
+	execute('nginx -s reload') // Restart nginx now
+	return (true)
 }
 
 //DICT:GET:ismoodle: Returns 1 if Moodle is present
