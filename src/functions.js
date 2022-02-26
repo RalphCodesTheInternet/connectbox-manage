@@ -61,7 +61,7 @@ get.clientssid = function (){
 }
 //DICT:SET:clientssid (string): Client Wi-Fi SSID
 set.clientssid = function (json){
-	return (execute(`sudo sed -i -e "/ssid=/ s/=.*/=\"${json.value}\"/" /etc/wpa_supplicant/wpa_supplicant.conf`))
+	return (execute(`sudo sed -i -e "/ssid=/ s/=.*/=\\\"${json.value}\\\"/" /etc/wpa_supplicant/wpa_supplicant.conf`))
 }
 
 //DICT:GET:clientpassphrase: Client Wi-Fi WPA Passphrase
