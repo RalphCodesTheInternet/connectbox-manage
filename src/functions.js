@@ -80,7 +80,7 @@ get.clientcountry = function (){
 //DICT:SET:clientcountry(2 letter country code): Client Wi-Fi Wi-Fi Country Support
 set.clientcountry = function (json){
 	execute(`sudo sed -i -e "/country_code=/ s/=.*/=${json.value}/" /etc/hostapd/hostapd.conf`)
-	return (execute(`sudo sed -i -e "/country=/ s/=.*/=\\\"${json.value}\\\"/" /etc/wpa_supplicant/wpa_supplicant.conf`))
+	return (execute(`sudo sed -i -e "/country=/ s/=.*/=\"${json.value}\"/" /etc/wpa_supplicant/wpa_supplicant.conf`))
 }
 
 //DICT:SET:wifirestart(interface): Client Wi-Fi Wi-Fi Country Support
