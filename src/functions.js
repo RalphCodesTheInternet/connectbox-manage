@@ -10,13 +10,6 @@ var get = {};
 var set = {};
 var doCommand = {};
 
-// This provides the interface information for each wifi interface
-var wifi = {"accesspoint":"wlan1","client":"wlan0"};  // Defaults
-if (fs.existsSync('/usr/local/connectbox/wificonf.txt')) {
-	wifi.accesspoint = execute(`grep 'AccessPointIF' /usr/local/connectbox/wificonf.txt | cut -d"=" -f2`);
-	wifi.client = execute(`grep 'ClientIF' /usr/local/connectbox/wificonf.txt | cut -d"=" -f2`);
-}
-
 function auth (password) {
 	console.log(auth);
 }
@@ -85,6 +78,13 @@ set.clientcountry = function (json){
 
 //DICT:SET:wifirestart(interface): Client Wi-Fi Wi-Fi Country Support
 set.wifirestart = function (json){
+	// This provides the interface information for each wifi interface
+	var wifi = {"accesspoint":"wlan1","client":"wlan0"};  // Defaults
+	if (fs.existsSync('/usr/local/connectbox/wificonf.txt')) {
+		wifi.accesspoint = execute(`grep 'AccessPointIF' /usr/local/connectbox/wificonf.txt | cut -d"=" -f2`);
+		wifi.client = execute(`grep 'ClientIF' /usr/local/connectbox/wificonf.txt | cut -d"=" -f2`);
+	}
+	// Now do the update
 	var interface = wifi[json.value];
 	return (execute(`sudo ifdown ${interface} && sudo ifup ${interface}`));
 }
@@ -138,7 +138,7 @@ set.openwelldownload = function(json) {
 //DICT:DO:openwellusb: Trigger a loading of OpenWell content from USB (openwell.zip OR semi-structured media)
 doCommand.openwellusb = function() {
 	if (fs.existsSync('/media/usb0/openwell.zip')) {
-		exec(`scripts/openwellunzip.sh`);
+		return(execute(`scripts/openwellunzip.sh`));
 	}
 	else {
 		return(execute(`sudo python /usr/local/connectbox/bin/enhancedInterfaceUSBLoader.py`))
