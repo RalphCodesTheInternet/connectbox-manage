@@ -23,6 +23,9 @@ else {
 			if (key.toLowerCase() === 'brand') {
 				console.log(functions.getBrand(value));
 			}
+			else if (key.toLowerCase() === 'logs') {
+				console.log(functions.getLogs(value));
+			}
 			else {
 				console.log(functions.get[key]());		
 			}
