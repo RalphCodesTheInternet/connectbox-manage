@@ -10,6 +10,12 @@ var get = {};
 var set = {};
 var doCommand = {};
 
+var logSources = {
+	"connectboxmanage":'sudo pm2 logs --lines 100 --nostream',
+	"webserver": 'cat /var/log/connectbox/connectbox-access.log',
+	"sync": 'cat /tmp/push_messages.log'
+}
+
 function auth (password) {
 	console.log(auth);
 }
@@ -215,16 +221,16 @@ set.securitykey = function(json) {
 	execute(`sudo wget -O /tmp/download.mbz ${json.value} >/tmp/course-download.log 2>&1`);
 }
 
+//DICT:GET:logsources: Returns an array of logs that can be viewed
+get.logsources = function() {
+	return(Object.keys(logSources))
+}
+
 //DICT:GET:logs: (log name) Retrieves log and formats for Admin log viewer
 function getLogs(logName) {
-	var logs = {
-		"connectboxmanage":'sudo pm2 logs --lines 100 --nostream',
-		"webserver": 'cat /var/log/connectbox/connectbox-access.log',
-		"sync": 'cat /tmp/push_messages.log'
-	}
 	var response = {
 	};
-	response[logName] = execute(logs[logName]);
+	response[logName] = execute(logSources[logName]);
 	return(response);
 }
 
