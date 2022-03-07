@@ -83,7 +83,7 @@ get.connectedclients = function (){
 		wifi.accesspoint = execute(`grep 'AccessPointIF' /usr/local/connectbox/wificonf.txt | cut -d"=" -f2`);
 		wifi.client = execute(`grep 'ClientIF' /usr/local/connectbox/wificonf.txt | cut -d"=" -f2`);
 	}
-	return (execute(`iw ${wifi.accesspoint} station dump |grep Station |wc -l`))
+	return (execute(`iw ${wifi.accesspoint} station dump |grep Station |wc -l | awk '{$1=$1};1'`))
 }
 
 //DICT:GET:clientwificonnection: Show status of client wifi
@@ -215,6 +215,19 @@ set.securitykey = function(json) {
 	execute(`sudo wget -O /tmp/download.mbz ${json.value} >/tmp/course-download.log 2>&1`);
 }
 
+//DICT:GET:logs: (log name) Retrieves log and formats for Admin log viewer
+function getLogs(logName) {
+	var logs = {
+		"connectboxmanage":'sudo pm2 logs --lines 100 --nostream',
+		"webserver": 'cat /var/log/connectbox/connectbox-access.log',
+		"sync": 'cat /tmp/push_messages.log'
+	}
+	var response = {
+	};
+	response[logName] = execute(logs[logName]);
+	return(response);
+}
+
 //DICT:GET:brand: Get value from brand.txt.  Must include a value such as Image
 function getBrand(key) {
 	var brand = JSON.parse(fs.readFileSync('/usr/local/connectbox/brand.txt'));
@@ -259,6 +272,7 @@ module.exports = {
 	get,
 	set,
 	doCommand,
+	getLogs,
 	getBrand,
 	setBrand
 };
