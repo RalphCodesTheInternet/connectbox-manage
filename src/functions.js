@@ -86,7 +86,7 @@ get.connectedclients = function (){
 	return (execute(`iw ${wifi.accesspoint} station dump |grep Station |wc -l`))
 }
 
-//DICT:GET:connectedclients: Count of devices connected to access point
+//DICT:GET:clientwificonnection: Show status of client wifi
 get.clientwificonnection = function (){
 	var wifi = {"accesspoint":"wlan1","client":"wlan0"};  // Defaults
 	if (fs.existsSync('/usr/local/connectbox/wificonf.txt')) {
@@ -111,6 +111,7 @@ set.wifirestart = function (json){
 	var response = execute(`sudo ifdown ${interface} && sleep 1 && sudo ifup ${interface}`);
 	if (json.value === 'accesspoint') {
 		response += execute(`sudo systemctl restart hostapd`);
+		response += execute(`sudo systemctl status hostapd`);
 	}
 	return (response);  
 }
