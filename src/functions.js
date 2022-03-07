@@ -2,6 +2,7 @@ const
     configs = require('./configs.js'),
 	{execSync}= require("child_process"),
 	{ exec } = require('child_process'),
+	{ spawn } = require('child_process'),
 	fs = require('fs'),
     Logger = require('./logger.js'),
     logger = new Logger(configs.logging);
@@ -13,6 +14,7 @@ var doCommand = {};
 var logSources = {
 	"connectboxmanage":'sudo pm2 logs --lines 100 --nostream',
 	"webserver": 'cat /var/log/connectbox/connectbox-access.log',
+	"loadContent": 'cat /tmp/loadContent.log',
 	"sync": 'cat /tmp/push_messages.log'
 }
 
@@ -179,7 +181,10 @@ doCommand.reboot = function() {
 
 //DICT:SET:openwelldownload (URL): Download the file and install into OpenWell 
 set.openwelldownload = function(json) {
-	return(execute(`sudo /usr/bin/python /usr/local/connectbox/bin/lazyLoader.py ${json.value}`));
+	spawn(`sudo /usr/bin/python /usr/local/connectbox/bin/lazyLoader.py ${json.value} >/tmp/loadContent.log 2>&1`, {
+    	detached: true
+	});
+	return ('Downloading content has begun.');
 }
 
 //DICT:DO:openwellusb: Trigger a loading of OpenWell content from USB (openwell.zip OR semi-structured media)
@@ -188,19 +193,22 @@ doCommand.openwellusb = function() {
 		return(execute(`scripts/openwellunzip.sh`));
 	}
 	else {
-		return(execute(`sudo python /usr/local/connectbox/bin/enhancedInterfaceUSBLoader.py`))
+		spawn('sudo python /usr/local/connectbox/bin/enhancedInterfaceUSBLoader.py >/tmp/loadContent.log 2>&1', [], {
+			detached: true
+		});
+		return ('Loading content has begun.');	
 	}
 }
 
 //DICT:SET:coursedownload (URL): Download the Moodle course and install 
 set.coursedownload = function(json) {
-	execute(`sudo wget -O /tmp/download.mbz ${json.value} >/tmp/course-download.log 2>&1`);
+	execute(`sudo wget -O /tmp/download.mbz ${json.value} >/tmp/loadContent.log 2>&1`);
 	return(execute(`sudo -u www-data /usr/bin/php /var/www/moodle/admin/cli/restore_backup.php --file=/tmp/download.mbz --categoryid=1`));
 }
 
 //DICT:DO:courseusb: Trigger a loading of Moodle content (*.mbz) from USB
 doCommand.courseusb = function() {
-	execute(`sudo -u www-data /usr/bin/php /var/www/moodle/admin/cli/restore_courses_directory.php /media/usb0/`);
+	execute(`sudo -u www-data /usr/bin/php /var/www/moodle/admin/cli/restore_courses_directory.php /media/usb0/ >/tmp/loadContent.log 2>&1`);
 	return true;
 }
 
