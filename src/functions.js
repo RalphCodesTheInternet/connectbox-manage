@@ -76,6 +76,28 @@ set.clientcountry = function (json){
 	return (execute(`sudo sed -i -e "/country=/ s/=.*/=\"${json.value}\"/" /etc/wpa_supplicant/wpa_supplicant.conf`))
 }
 
+//DICT:GET:connectedclients: Count of devices connected to access point
+get.connectedclients = function (){
+	var wifi = {"accesspoint":"wlan1","client":"wlan0"};  // Defaults
+	if (fs.existsSync('/usr/local/connectbox/wificonf.txt')) {
+		wifi.accesspoint = execute(`grep 'AccessPointIF' /usr/local/connectbox/wificonf.txt | cut -d"=" -f2`);
+		wifi.client = execute(`grep 'ClientIF' /usr/local/connectbox/wificonf.txt | cut -d"=" -f2`);
+	}
+	return (execute(`iw ${wifi.accesspoint} station dump |grep Station |wc -l`))
+}
+
+//DICT:GET:connectedclients: Count of devices connected to access point
+get.clientwificonnection = function (){
+	var wifi = {"accesspoint":"wlan1","client":"wlan0"};  // Defaults
+	if (fs.existsSync('/usr/local/connectbox/wificonf.txt')) {
+		wifi.accesspoint = execute(`grep 'AccessPointIF' /usr/local/connectbox/wificonf.txt | cut -d"=" -f2`);
+		wifi.client = execute(`grep 'ClientIF' /usr/local/connectbox/wificonf.txt | cut -d"=" -f2`);
+	}
+	var text = ['Offline','Connected'];
+	var response = text[execute(`iwconfig ${wifi.client} | grep 'Link Quality' |wc -l`)] || "Error: Device Not Found";
+	return (response);
+}
+
 //DICT:SET:wifirestart(interface): Client Wi-Fi Wi-Fi Country Support
 set.wifirestart = function (json){
 	// This provides the interface information for each wifi interface
@@ -86,7 +108,25 @@ set.wifirestart = function (json){
 	}
 	// Now do the update
 	var interface = wifi[json.value];
-	return (execute(`sudo ifdown ${interface} && sudo ifup ${interface}`));
+	var response = execute(`sudo ifdown ${interface} && sleep 1 && sudo ifup ${interface}`);
+	if (json.valud === 'accesspoint') {
+		response += execute(`sudo systemctl restart hostapd`);
+	}
+	return (response);  // Sleep allows OS to know that 
+}
+
+//DICT:GET:wifistatus: Retrieve current wifi adaptor information
+get.wifistatus = function (){
+	var wifi = {"accesspoint":"wlan1","client":"wlan0"};  // Defaults
+	if (fs.existsSync('/usr/local/connectbox/wificonf.txt')) {
+		wifi["Access Point Status"] = execute(`grep 'AccessPointIF' /usr/local/connectbox/wificonf.txt | cut -d"=" -f2`);
+		wifi["Client Wi-Fi Status"] = execute(`grep 'ClientIF' /usr/local/connectbox/wificonf.txt | cut -d"=" -f2`);
+	}
+	var response = {
+		accesspoint: execute(`iwconfig ${wifi.accesspoint} && ifconfig ${wifi.accesspoint}` || null),
+		client: execute(`iwconfig ${wifi.client} && ifconfig ${wifi.client}` || null)
+	}
+	return (response);
 }
 
 //DICT:GET:hostname: Box Hostname
@@ -204,7 +244,13 @@ function setBrand(body) {
 }
 
 function execute(command) {
-	return(execSync(command).toString().replace('\n',''));
+	var response = ''
+	try {
+		return(execSync(command).toString().replace('\n',''));
+	}
+	catch (error) {
+		return(error.toString());
+	}
 }
 
 module.exports = {
