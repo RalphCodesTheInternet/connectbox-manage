@@ -2,7 +2,6 @@ const
     configs = require('./configs.js'),
 	{execSync}= require("child_process"),
 	{ exec } = require('child_process'),
-	{ spawn } = require('child_process'),
 	fs = require('fs'),
     Logger = require('./logger.js'),
     logger = new Logger(configs.logging);
@@ -181,9 +180,7 @@ doCommand.reboot = function() {
 
 //DICT:SET:openwelldownload (URL): Download the file and install into OpenWell 
 set.openwelldownload = function(json) {
-	spawn(`sudo /usr/bin/python /usr/local/connectbox/bin/lazyLoader.py ${json.value} >/tmp/loadContent.log 2>&1`, {
-    	detached: true
-	});
+	exec(`sudo /usr/bin/python /usr/local/connectbox/bin/lazyLoader.py ${json.value} >/tmp/loadContent.log 2>&1`);
 	return ('Downloading content has begun.');
 }
 
@@ -193,9 +190,7 @@ doCommand.openwellusb = function() {
 		return(execute(`scripts/openwellunzip.sh`));
 	}
 	else {
-		spawn('sudo python /usr/local/connectbox/bin/enhancedInterfaceUSBLoader.py >/tmp/loadContent.log 2>&1', [], {
-			detached: true
-		});
+		exec('sudo python /usr/local/connectbox/bin/enhancedInterfaceUSBLoader.py >/tmp/loadContent.log 2>&1');
 		return ('Loading content has begun.');	
 	}
 }
