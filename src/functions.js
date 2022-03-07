@@ -109,10 +109,10 @@ set.wifirestart = function (json){
 	// Now do the update
 	var interface = wifi[json.value];
 	var response = execute(`sudo ifdown ${interface} && sleep 1 && sudo ifup ${interface}`);
-	if (json.valud === 'accesspoint') {
+	if (json.value === 'accesspoint') {
 		response += execute(`sudo systemctl restart hostapd`);
 	}
-	return (response);  // Sleep allows OS to know that 
+	return (response);  
 }
 
 //DICT:GET:wifistatus: Retrieve current wifi adaptor information
