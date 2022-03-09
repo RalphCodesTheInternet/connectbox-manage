@@ -163,6 +163,19 @@ get.ismoodle = function() {
 	}
 }
 
+//DICT:DO:sync: Start manual sync to Cloud Server
+doCommand.sync = function() {
+	execute('sudo chmod 666 /tmp/*.log');
+	if (fs.existsSync('/var/www/moodle/index.php')) {
+		exec(`sudo -u www-data /usr/bin/php /var/www/moodle/local/chat_attachments/push_messages.php true >/tmp/push_messages.log 2>&1`);
+		return('Syncing Moodle With Server');
+	}
+	else {
+		exec(`sudo -u www-data /usr/bin/python /usr/local/connectbox/bin/phonehome.py >/tmp/push_messages.log  2>&1`);
+		return('Syncing Without Moodle');
+	}
+}
+
 //DICT:DO:umountusb: Unmount USB for safe removal
 doCommand.unmountusb = function() {
 	return(execute(`sudo pumount /media/usb0`));
