@@ -197,6 +197,12 @@ set.openwelldownload = function(json) {
 	return ('Downloading content has begun.');
 }
 
+//DICT:DO:openwellrefresh: Check for missing pieces from a openwelldownload and get those pieces
+doCommand.openwellrefresh = function() {
+	exec(`sudo /usr/bin/python /usr/local/connectbox/bin/lazyLoader.py >/tmp/loadContent.log 2>&1`);
+	return ('Downloading content has begun.');
+}
+
 //DICT:DO:openwellusb: Trigger a loading of OpenWell content from USB (openwell.zip OR semi-structured media)
 doCommand.openwellusb = function() {
 	if (fs.existsSync('/media/usb0/openwell.zip')) {
