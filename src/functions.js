@@ -11,6 +11,7 @@ var set = {};
 var doCommand = {};
 
 var logSources = {
+	"wifistatus":'connectboxmanage get wifistatus',
 	"connectboxmanage":'sudo pm2 logs --lines 100 --nostream',
 	"webserver": 'cat /var/log/connectbox/connectbox-access.log',
 	"loadContent": 'cat /tmp/loadContent.log',
