@@ -35,7 +35,7 @@ get.apssid = function (){
 }
 //DICT:SET:apssid (string): Access Point SSID
 set.apssid = function (json){
-	return (execute(`sudo sed -i -e "/ssid=/ s/=.*/=\"${json.value}\"/" /etc/hostapd/hostapd.conf`))
+	return (execute(`sudo sed -i -e "/^ssid=/ s/=.*/=${json.value}/" /etc/hostapd/hostapd.conf`))
 }
 
 //DICT:GET:appassphrase: Access Point WPA passphrase
