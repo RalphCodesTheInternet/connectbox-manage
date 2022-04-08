@@ -177,11 +177,6 @@ doCommand.sync = function() {
 	}
 }
 
-//DICT:DO:umountusb: Unmount USB for safe removal
-doCommand.unmountusb = function() {
-	return(execute(`sudo pumount /media/usb0`));
-}
-
 //DICT:DO:shutdown: Halt system
 doCommand.shutdown = function() {
 	return(execute(`sudo shutdown -t 1 -h`))
