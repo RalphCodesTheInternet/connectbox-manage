@@ -179,12 +179,12 @@ doCommand.sync = function() {
 
 //DICT:DO:shutdown: Halt system
 doCommand.shutdown = function() {
-	return(execute(`sudo shutdown -t 1 -h`))
+	return(execute(`sudo shutdown -h now`))
 }
 
 //DICT:DO:reboot: Reboot
 doCommand.reboot = function() {
-	return(execute(`sudo shutdown -t 1 -r`))
+	return(execute(`sudo shutdown -r now`))
 }
 
 //DICT:SET:openwelldownload (URL): Download the file and install into OpenWell 
