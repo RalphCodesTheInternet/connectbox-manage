@@ -44,7 +44,21 @@ get.appassphrase = function (){
 }
 //DICT:SET:appassphrase (string): Access Point WPA passphrase
 set.appassphrase = function (json){
-	return (execute(`sudo sed -i -e "/wpa_passphrase=/ s/=.*/=\"${json.value}\"/" /etc/hostapd/hostapd.conf`))
+	if (json.value.length >= 8) {
+		// Check to see if the line is in hostapd.conf before writing
+		if (execute(`cat /etc/hostapd/hostapd.conf |grep wpa_passphrase= |wc -l`) == 0) {
+			// Write new value (previous state was no WPA)
+			return(execute(`echo 'wpa_passphrase=${json.value}' | sudo tee -a /etc/hostapd/hostapd.conf >/dev/null`));
+		}
+		else {
+			// Modify existing passphrase
+			return (execute(`sudo sed -i -e "/wpa_passphrase=/ s/=.*/=\"${json.value}\"/" /etc/hostapd/hostapd.conf`))
+		}
+	}
+	else {
+		// Remove existing passphrase
+		return (execute(`sudo sed -i -e "/wpa_passphrase=/ s/wpa_passphrase=.*//" /etc/hostapd/hostapd.conf`))	
+	}
 }
 
 //DICT:GET:apchannel: Access Point Wi-Fi Channel
