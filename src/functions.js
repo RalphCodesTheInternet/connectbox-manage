@@ -236,8 +236,8 @@ doCommand.courseusb = function() {
 	return true;
 }
 
-//DICT:DO:wipe (password): Erase SD Card -- password is wipethebox
-doCommand.wipe = function(json) {
+//DICT:SET:wipe (password): Erase SD Card -- password is wipethebox
+set.wipe = function(json) {
     if (json.value === 'wipethebox') {
     	exec(`scripts/wipe.sh &`);
 	    return true;
