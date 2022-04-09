@@ -35,7 +35,7 @@ get.apssid = function (){
 }
 //DICT:SET:apssid (string): Access Point SSID
 set.apssid = function (json){
-	return (execute(`sudo /usr/local/connectbox/wifi_configurator_venv/bin/wifi_configurator --ssid ${json.value}`));
+	return (execute(`sudo sed -i -e "/^ssid=/ s/=.*/=${json.value}/" /etc/hostapd/hostapd.conf`))
 }
 
 //DICT:GET:appassphrase: Access Point WPA passphrase
@@ -44,7 +44,7 @@ get.appassphrase = function (){
 }
 //DICT:SET:appassphrase (string): Access Point WPA passphrase
 set.appassphrase = function (json){
-	return (execute(`sudo /usr/local/connectbox/wifi_configurator_venv/bin/wifi_configurator --wpa-passphrase ${json.value}`));
+	return (execute(`sudo sed -i -e "/wpa_passphrase=/ s/=.*/=\"${json.value}\"/" /etc/hostapd/hostapd.conf`))
 }
 
 //DICT:GET:apchannel: Access Point Wi-Fi Channel
@@ -53,7 +53,7 @@ get.apchannel = function (){
 }
 //DICT:SET:apchannel (integer): Access Point Wi-Fi Channel
 set.apchannel = function (json){
-	return (execute(`sudo /usr/local/connectbox/wifi_configurator_venv/bin/wifi_configurator --channel ${json.value}`));
+	return (execute(`sudo sed -i -e "/channel=/ s/=.*/=\"${json.value}\"/" /etc/hostapd/hostapd.conf`))
 }
 
 //DICT:GET:clientssid: Client Wi-Fi SSID
