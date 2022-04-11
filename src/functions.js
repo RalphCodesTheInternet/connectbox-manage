@@ -70,6 +70,30 @@ set.apchannel = function (json){
 	return (execute(`sudo sed -i -e "/channel=/ s/=.*/=\"${json.value}\"/" /etc/hostapd/hostapd.conf`))
 }
 
+//DICT:GET:clientwifiscan: Scan for Available Networks
+get.clientwifiscan = function (){
+	var types = {'on':true,'off':false};
+	var response = [];
+	var output = execute(`sudo iwlist wlan1 scan`);
+	for (var outputRecord of output.split(' - Address:')) {
+		var record = {};
+		for (var line of outputRecord.split('\n')) {
+			line = line.trim();
+			var [key,val] = line.split(':');
+			if (key === 'ESSID') {
+				record.ssid = val.replace(/\"/g,"");
+			}
+			if (key === 'Encryption key') {
+				record.encryption = types[val];
+			}
+		}
+		if (record.ssid && record.ssid.length > 0) {
+			response.push(record);
+		}
+	}
+	return(response);
+}
+
 //DICT:GET:clientssid: Client Wi-Fi SSID
 get.clientssid = function (){
 	return (execute(`grep 'ssid' /etc/wpa_supplicant/wpa_supplicant.conf | cut -d'"' -f2`))
