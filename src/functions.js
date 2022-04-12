@@ -324,6 +324,19 @@ function setBrand(body) {
 	return(body.value);
 }
 
+//DICT:SET:weblog: Send a single web log item
+set.weblog = function (json){
+	try {
+		json.value = JSON.parse(json.value);
+		json.value.timestamp = Math.round(Date.now() / 1000);
+		fs.appendFileSync('/var/log/connectbox/connectbox_enhanced.log',JSON.stringify(json.value) + '\n');
+		return true;
+ 	}
+ 	catch (err) {
+ 		return false;
+ 	}
+}
+
 function execute(command) {
 	var response = ''
 	try {
