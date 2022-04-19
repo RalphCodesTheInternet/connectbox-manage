@@ -237,7 +237,7 @@ get.subscribe = function() {
 }
 //DICT:SET:subscribe (URL): Set a new subscription: https://SERVERNAME/api/
 set.subscribe = function(json) {
-	var value = {packagesAPIFeed:json.value};
+	var value = {packagesAPIFeed:json.value,lastUpdated:1};
 	execute('sudo touch /var/www/enhanced/content/www/assets/content/subscription.json')
 	execute('sudo chmod 666 /var/www/enhanced/content/www/assets/content/subscription.json')
 	fs.writeFileSync('/var/www/enhanced/content/www/assets/content/subscription.json',JSON.stringify(value));
