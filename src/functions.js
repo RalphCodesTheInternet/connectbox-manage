@@ -252,13 +252,13 @@ set.openwelldownload = function(json) {
 
 //DICT:DO:openwellrefresh: Check for missing pieces from a openwelldownload and get those pieces
 doCommand.openwellrefresh = function() {
-	var processes = execute(`pgrep -f 'lazyLoader.py'`);
-	if (processes && !processes.includes('Error: Command failed: pgrep')) {
-		return ('Downloading is already running.')
-	}
-	else {
+	var processes = execute(`pgrep -af 'lazyLoader.py'`);
+	if (!processes.includes('python')) {
 		exec(`sudo /usr/bin/python /usr/local/connectbox/bin/lazyLoader.py >/tmp/loadContent.log 2>&1`);
 		return ('Downloading content has begun.');
+	}
+	else {
+		return ('Downloading is already running.')	
 	}
 }
 
