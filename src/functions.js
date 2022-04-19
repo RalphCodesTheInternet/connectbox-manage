@@ -239,7 +239,7 @@ get.subscribe = function() {
 set.subscribe = function(json) {
 	var value = {packagesAPIFeed:json.value};
 	execute('sudo touch /var/www/enhanced/content/www/assets/content/subscription.json')
-	execute('sudo chmod 777 /var/www/enhanced/content/www/assets/content/subscription.json')
+	execute('sudo chmod 666 /var/www/enhanced/content/www/assets/content/subscription.json')
 	fs.writeFileSync('/var/www/enhanced/content/www/assets/content/subscription.json',JSON.stringify(value));
 	return ('Subscribed to ' + json.value);
 }
