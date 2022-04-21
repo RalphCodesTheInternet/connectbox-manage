@@ -330,10 +330,13 @@ function setBrand(body) {
 	var brand = JSON.parse(fs.readFileSync('/usr/local/connectbox/brand.txt'));
 	var key = body.value.split('=')[0];
 	var val = body.value.split('=')[1];
-	if (typeof getBrand(key) === 'number') {
+	try {
 		brand[key] = parseInt(val);
+		if (brand[key] === null) {
+			brand[key] = val;
+		}
 	}
-	else {
+	catch {
 		brand[key] = val;
 	}
 	// One key sets a few lcd_pages_stats values so loop through and update all of them
