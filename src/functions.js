@@ -325,7 +325,7 @@ function getBrand(key) {
 	return(brand[key] || 0);
 }
 
-//DICT:SET:brand: Set value in brand.txt where value is like Image=connectbox_logo.png
+//DICT:SET:brand (key=value): Set value in brand.txt where value is like Image=connectbox_logo.png
 function setBrand(body) {
 	var brand = JSON.parse(fs.readFileSync('/usr/local/connectbox/brand.txt'));
 	var key = body.value.split('=')[0];
@@ -349,7 +349,7 @@ function setBrand(body) {
 	return(body.value);
 }
 
-//DICT:SET:weblog: Send a single web log item
+//DICT:SET:weblog (json): Send a single web log item
 set.weblog = function (json){
 	try {
 		json.value = JSON.parse(json.value);
