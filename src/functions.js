@@ -332,7 +332,7 @@ function setBrand(body) {
 	var val = body.value.split('=')[1];
 	try {
 		brand[key] = parseInt(val);
-		if (brand[key] === null) {
+		if (isNaN(brand[key])) {
 			brand[key] = val;
 		}
 	}
