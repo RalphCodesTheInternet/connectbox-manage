@@ -3,6 +3,7 @@ const
 	{execSync}= require("child_process"),
 	{ exec } = require('child_process'),
 	fs = require('fs'),
+	request = require('request'),
     Logger = require('./logger.js'),
     logger = new Logger(configs.logging);
 
@@ -225,6 +226,15 @@ doCommand.reboot = function() {
 	return(execute(`sudo shutdown -r now &`))
 }
 
+
+
+//DICT:GET:subscriptions: Returns a list of subscriptions available on the server
+get.subscriptions = function() {
+	var server = getBrand('server_url');
+	if (server && server.length > 5) {
+		
+	}
+}
 //DICT:GET:subscribe: Returns the current openwell content subscription 
 get.subscribe = function() {
 	try {
