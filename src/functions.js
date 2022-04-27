@@ -279,6 +279,18 @@ set.coursedownload = function(json) {
 	return(execute(`sudo -u www-data /usr/bin/php /var/www/moodle/admin/cli/restore_backup.php --file=/tmp/download.mbz --categoryid=1`));
 }
 
+//DICT:GET:coursesonusb: Get list of .mbz Moodle course files on /USB/courses
+get.coursesonusb = function() {
+	var filenames = fs.readdirSync('/media/usb0/courses');
+	var response = [];
+	for (var file of filenames) {
+		if (file.contains('.mbz')) {
+			response.push(file)
+		}
+	}
+	return (response);
+}
+
 //DICT:DO:courseusb: Trigger a loading of Moodle content (*.mbz) from USB
 doCommand.courseusb = function() {
 	execute(`sudo -u www-data /usr/bin/php /var/www/moodle/admin/cli/restore_courses_directory.php /media/usb0/ >/tmp/loadContent.log 2>&1`);
