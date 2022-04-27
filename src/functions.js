@@ -269,7 +269,7 @@ doCommand.openwellusb = function() {
 		execute(`sudo ln -s /media/usb0/package/* /var/www/enhanced/content/www/assets/content/`)
 		return('Loading Package Found at /USB/package.');
 	}
-	else if (fs.existsSync('/media/usb0/content')) { {
+	else if (fs.existsSync('/media/usb0/content')) {
 		exec('sudo python /usr/local/connectbox/bin/enhancedInterfaceUSBLoader.py >/tmp/loadContent.log 2>&1');
 		return ('Loading content from /USB/content.');	
 	}
