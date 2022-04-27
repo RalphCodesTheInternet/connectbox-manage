@@ -274,7 +274,7 @@ doCommand.openwellusb = function() {
 		return ('Loading content from /USB/content.');	
 	}
 	else {
-		return (`No USB content found. Can't Load Anything.`)
+		return ({status:404,message:`No USB content found. Can't Load Anything.`})
 	}
 }
 
