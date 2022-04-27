@@ -231,9 +231,19 @@ doCommand.reboot = function() {
 //DICT:GET:subscriptions: Returns a list of subscriptions available on the server
 get.subscriptions = function() {
 	var server = getBrand('server_url');
-	if (server && server.length > 5) {
-		
-	}
+	try {
+		var data = JSON.parse(execute(`curl -sL ${server}/chathost/link/openwell`));
+		var response = [];
+		for (var record of data) {
+			if (record['is_slim']) {
+				response.push(record.package);
+			}
+		}
+		return (response);
+ 	}
+ 	catch(err) {
+ 		return({status:404,message:"Server URL is not reachable"});
+ 	}
 }
 //DICT:GET:subscribe: Returns the current openwell content subscription 
 get.subscribe = function() {
