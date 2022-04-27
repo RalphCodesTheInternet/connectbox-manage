@@ -194,7 +194,7 @@ set.hostname = function (json){
 
 //DICT:GET:ismoodle: Returns 1 if Moodle is present
 get.ismoodle = function() {
-	if (!fs.existsSync('/var/www/moodle/index.php')) {
+	if (fs.existsSync('/var/www/moodle/index.php')) {
 		return('1');
 	}
 	else {
