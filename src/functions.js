@@ -281,12 +281,17 @@ set.coursedownload = function(json) {
 
 //DICT:GET:coursesonusb: Get list of .mbz Moodle course files on /USB/courses
 get.coursesonusb = function() {
-	var filenames = fs.readdirSync('/media/usb0/courses');
 	var response = [];
-	for (var file of filenames) {
-		if (file.contains('.mbz')) {
-			response.push(file)
+	try {
+		var filenames = fs.readdirSync('/media/usb0/courses');
+		for (var file of filenames) {
+			if (file.contains('.mbz')) {
+				response.push(file)
+			}
 		}
+	}
+	catch (err){
+		//console.log(err);
 	}
 	return (response);
 }
