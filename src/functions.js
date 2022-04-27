@@ -230,7 +230,7 @@ doCommand.reboot = function() {
 
 //DICT:GET:subscriptions: Returns a list of subscriptions available on the server
 get.subscriptions = function() {
-	var server = getBrand('server_url');
+	var server = getBrand('server_url') || execute (`sudo -u www-data php get_server_url.php`);
 	try {
 		var data = JSON.parse(execute(`curl -sL ${server}/chathost/link/openwell`));
 		var response = [];
