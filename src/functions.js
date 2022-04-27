@@ -285,7 +285,7 @@ get.coursesonusb = function() {
 	try {
 		var filenames = fs.readdirSync('/media/usb0/courses');
 		for (var file of filenames) {
-			if (file.contains('.mbz')) {
+			if (file.includes('.mbz')) {
 				response.push(file)
 			}
 		}
