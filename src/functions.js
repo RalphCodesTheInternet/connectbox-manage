@@ -194,7 +194,7 @@ set.hostname = function (json){
 
 //DICT:GET:ismoodle: Returns 1 if Moodle is present
 get.ismoodle = function() {
-	if (fs.existsSync('/var/www/moodle/index.php')) {
+	if (!fs.existsSync('/var/www/moodle/index.php')) {
 		return('1');
 	}
 	else {
@@ -262,14 +262,19 @@ doCommand.openwellrefresh = function() {
 	}
 }
 
-//DICT:DO:openwellusb: Trigger a loading of OpenWell content from USB (openwell.zip OR semi-structured media)
+//DICT:DO:openwellusb: Trigger a loading of OpenWell content from USB (/USB/package OR /USB/content semi-structured media)
 doCommand.openwellusb = function() {
-	if (fs.existsSync('/media/usb0/openwell.zip')) {
-		return(execute(`scripts/openwellunzip.sh`));
+	if (fs.existsSync('/media/usb0/package/language.json')) {
+		execute('sudo rm -rf /var/www/enhanced/content/www/assets/content/*');
+		execute(`sudo ln -s /media/usb0/package/* /var/www/enhanced/content/www/assets/content/`)
+		return('Loading Package Found at /USB/package.');
+	}
+	else if (fs.existsSync('/media/usb0/content')) { {
+		exec('sudo python /usr/local/connectbox/bin/enhancedInterfaceUSBLoader.py >/tmp/loadContent.log 2>&1');
+		return ('Loading content from /USB/content.');	
 	}
 	else {
-		exec('sudo python /usr/local/connectbox/bin/enhancedInterfaceUSBLoader.py >/tmp/loadContent.log 2>&1');
-		return ('Loading content has begun.');	
+		return (`No USB content found. Can't Load Anything.`)
 	}
 }
 
@@ -296,9 +301,9 @@ get.coursesonusb = function() {
 	return (response);
 }
 
-//DICT:DO:courseusb: Trigger a loading of Moodle content (*.mbz) from USB
-doCommand.courseusb = function() {
-	execute(`sudo -u www-data /usr/bin/php /var/www/moodle/admin/cli/restore_courses_directory.php /media/usb0/ >/tmp/loadContent.log 2>&1`);
+//DICT:SET:courseusb (filename): Trigger a loading of Moodle content from /USB/courses
+set.courseusb = function(json) {
+	execute(`sudo -u www-data php /var/www/moodle/admin/cli/restore_backup.php -f="/media/usb0/courses/${json.value}" -c=1 >/tmp/loadContent.log 2>&1`);
 	return true;
 }
 
