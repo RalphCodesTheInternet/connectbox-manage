@@ -230,13 +230,13 @@ doCommand.reboot = function() {
 
 //DICT:GET:subscriptions: Returns a list of subscriptions available on the server
 get.subscriptions = function() {
-	var server = getBrand('server_url') || execute (`sudo -u www-data php get_server_url.php`);
+	var server = getBrand('server_url') || execute (`sudo -u www-data php /var/www/moodle/local/chat_attachments/get_server_url.php`);
 	try {
 		var data = JSON.parse(execute(`curl -sL ${server}/chathost/link/openwell`));
 		var response = [];
 		for (var record of data) {
 			if (record['is_slim']) {
-				response.push(record.package);
+				response.push({name:record.package,value:`${server}/chathost/link/openwell?packageName=${encodeURI(record.package)}`});
 			}
 		}
 		return (response);
