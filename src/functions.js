@@ -241,7 +241,7 @@ get.subscriptions = function() {
 				isSelected = true;
 			}
 			if (record['is_slim']) {
-				response.push({name:record.package,value:`${server}/chathost/link/openwell?packageName=${encodeURI(record.package)}`,selected:isSelected});
+				response.push({name:record.package,value:`${server}/chathost/link/openwell?packageName=${encodeURI(record.package)}`,isSelected:isSelected});
 			}
 		}
 		return (response);
