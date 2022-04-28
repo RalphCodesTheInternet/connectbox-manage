@@ -411,6 +411,10 @@ function setBrand(body) {
 	return(body.value);
 }
 
+//DICT:GET:weblog: Get logs since last get
+get.weblog = function (json){
+	return([{test:true}]);
+}
 //DICT:SET:weblog (json): Send a single web log item
 set.weblog = function (json){
 	try {
