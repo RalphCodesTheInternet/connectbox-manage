@@ -250,6 +250,18 @@ get.subscriptions = function() {
  		return({status:404,message:"Server URL is not reachable"});
  	}
 }
+//DICT:GET:package: Returns the current openwell content package name
+get.package = function() {
+	try {
+		var languages = require("/var/www/enhanced/content/www/assets/content/languages.json");
+		var language = languages[0].codes[0].substring(0,2).toLowerCase();
+		var main = require(`/var/www/enhanced/content/www/assets/content/${language}/data/main.json`);
+		return(main.itemName);
+	}
+	catch (err){
+		return (204);
+	}
+}
 //DICT:GET:subscribe: Returns the current openwell content subscription 
 get.subscribe = function() {
 	try {
