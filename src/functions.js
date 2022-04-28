@@ -249,7 +249,7 @@ get.subscriptions = function() {
 get.subscribe = function() {
 	try {
 		var subscribe = require("/var/www/enhanced/content/www/assets/content/subscription.json");
-		return(decodeURI(subscribe.packagesAPIFeed.split('packageName='))[1]);
+		return(decodeURI(subscribe.packagesAPIFeed.split('packageName=')[1]));
 	}
 	catch (err){
 		return (204);
