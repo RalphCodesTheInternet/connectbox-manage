@@ -413,7 +413,14 @@ function setBrand(body) {
 
 //DICT:GET:weblog: Get logs since last get
 get.weblog = function (json){
-	return(JSON.stringify([{test:true}]));
+	try {
+		var logString = fs.readFileSync('/var/log/connectbox/connectbox_enhanced.log');
+		var logArray = logString.split('\n');
+		return (JSON.stringify(logArray));
+	}
+	catch (err) {
+		return(JSON.stringify(['']));
+	}
 }
 //DICT:SET:weblog (json): Send a single web log item
 set.weblog = function (json){
