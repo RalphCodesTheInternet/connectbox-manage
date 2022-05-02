@@ -414,7 +414,7 @@ function setBrand(body) {
 //DICT:GET:weblog: Get logs since last get
 get.weblog = function (json){
 	try {
-		var logString = fs.readFileSync('/var/log/connectbox/connectbox_enhanced.log');
+		var logString = fs.readFileSync('/var/log/connectbox/connectbox_enhanced.log','utf-8');
 		var logArray = logString.split('\n');
 		return (JSON.stringify(logArray));
 	}
