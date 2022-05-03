@@ -445,7 +445,7 @@ get.disable_openwell_chat = function (json){
 		return false;
 	}
 }
-//DICT:SET:weblog (json): Send a single web log item
+//DICT:SET:disable_openwell_chat (json): 1 is disabled and 0 is enabled
 set.disable_openwell_chat = function (json){
 	try {
 		var chat = require('/var/www/enhanced/content/www/assets/content/chat.json');
