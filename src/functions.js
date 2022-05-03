@@ -435,6 +435,29 @@ set.weblog = function (json){
  	}
 }
 
+//DICT:GET:disable_openwell_chat: Get status of disabling chat
+get.disable_openwell_chat = function (json){
+	try {
+		var chat = require('/var/www/enhanced/content/www/assets/content/chat.json');
+		return (chat["disable_openwell_chat"]);
+	}
+	catch (err) {
+		return false;
+	}
+}
+//DICT:SET:weblog (json): Send a single web log item
+set.disable_openwell_chat = function (json){
+	try {
+		var chat = require('/var/www/enhanced/content/www/assets/content/chat.json');
+		chat["disable_openwell_chat"]) = json.value;
+		fs.writeFileSync('/var/www/enhanced/content/www/assets/content/chat.json',JSON.stringify(chat));
+		return true;
+ 	}
+ 	catch (err) {
+ 		return false;
+ 	}
+}
+
 function execute(command) {
 	var response = ''
 	try {
