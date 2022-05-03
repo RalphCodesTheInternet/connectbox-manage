@@ -449,7 +449,7 @@ get.disable_openwell_chat = function (json){
 set.disable_openwell_chat = function (json){
 	try {
 		var chat = require('/var/www/enhanced/content/www/assets/content/chat.json');
-		chat["disable_openwell_chat"]) = json.value;
+		chat["disable_openwell_chat"] = json.value;
 		fs.writeFileSync('/var/www/enhanced/content/www/assets/content/chat.json',JSON.stringify(chat));
 		return true;
  	}
