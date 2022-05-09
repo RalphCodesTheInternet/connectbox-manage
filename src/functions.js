@@ -264,7 +264,7 @@ get.package = function() {
 }
 //DICT:GET:packagestatus: Returns the current number of missing items in openwell content package
 get.packagestatus = function() {
-	return(execute(`grep 'Failed Item Count' /tmp/loadContent.log | cut -d": " -f2`));
+	return(execute(`grep 'Failed Item Count' /tmp/loadContent.log | cut -d":" -f2`));
 }
 
 //DICT:GET:subscribe: Returns the current openwell content subscription 
