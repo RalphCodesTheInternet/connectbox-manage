@@ -3,6 +3,7 @@ const
 	{execSync}= require("child_process"),
 	{ exec } = require('child_process'),
 	fs = require('fs'),
+	request = require('request'),
     Logger = require('./logger.js'),
     logger = new Logger(configs.logging);
 
@@ -35,7 +36,7 @@ get.apssid = function (){
 }
 //DICT:SET:apssid (string): Access Point SSID
 set.apssid = function (json){
-	return (execute(`sudo /usr/local/connectbox/wifi_configurator_venv/bin/wifi_configurator --ssid ${json.value}`));
+	return (execute(`sudo sed -i -e "/^ssid=/ s/=.*/=${json.value}/" /etc/hostapd/hostapd.conf`))
 }
 
 //DICT:GET:appassphrase: Access Point WPA passphrase
@@ -44,7 +45,21 @@ get.appassphrase = function (){
 }
 //DICT:SET:appassphrase (string): Access Point WPA passphrase
 set.appassphrase = function (json){
-	return (execute(`sudo /usr/local/connectbox/wifi_configurator_venv/bin/wifi_configurator --wpa-passphrase ${json.value}`));
+	if (json.value.length >= 8) {
+		// Check to see if the line is in hostapd.conf before writing
+		if (execute(`cat /etc/hostapd/hostapd.conf |grep wpa_passphrase= |wc -l`) == 0) {
+			// Write new value (previous state was no WPA)
+			return(execute(`echo 'wpa_passphrase=${json.value}' | sudo tee -a /etc/hostapd/hostapd.conf >/dev/null`));
+		}
+		else {
+			// Modify existing passphrase
+			return (execute(`sudo sed -i -e "/wpa_passphrase=/ s/=.*/=\"${json.value}\"/" /etc/hostapd/hostapd.conf`))
+		}
+	}
+	else {
+		// Remove existing passphrase
+		return (execute(`sudo sed -i -e "/wpa_passphrase=/ s/wpa_passphrase=.*//" /etc/hostapd/hostapd.conf`))	
+	}
 }
 
 //DICT:GET:apchannel: Access Point Wi-Fi Channel
@@ -53,7 +68,31 @@ get.apchannel = function (){
 }
 //DICT:SET:apchannel (integer): Access Point Wi-Fi Channel
 set.apchannel = function (json){
-	return (execute(`sudo /usr/local/connectbox/wifi_configurator_venv/bin/wifi_configurator --channel ${json.value}`));
+	return (execute(`sudo sed -i -e "/channel=/ s/=.*/=\"${json.value}\"/" /etc/hostapd/hostapd.conf`))
+}
+
+//DICT:GET:clientwifiscan: Scan for Available Networks
+get.clientwifiscan = function (){
+	var types = {'on':true,'off':false};
+	var response = [];
+	var output = execute(`sudo iwlist wlan1 scan`);
+	for (var outputRecord of output.split(' - Address:')) {
+		var record = {};
+		for (var line of outputRecord.split('\n')) {
+			line = line.trim();
+			var [key,val] = line.split(':');
+			if (key === 'ESSID') {
+				record.ssid = val.replace(/\"/g,"");
+			}
+			if (key === 'Encryption key') {
+				record.encryption = types[val];
+			}
+		}
+		if (record.ssid && record.ssid.length > 0) {
+			response.push(record);
+		}
+	}
+	return(response);
 }
 
 //DICT:GET:clientssid: Client Wi-Fi SSID
@@ -179,12 +218,72 @@ doCommand.sync = function() {
 
 //DICT:DO:shutdown: Halt system
 doCommand.shutdown = function() {
-	return(execute(`sudo shutdown -h now`))
+	return(execute(`sudo shutdown -h now &`))
 }
 
 //DICT:DO:reboot: Reboot
 doCommand.reboot = function() {
-	return(execute(`sudo shutdown -r now`))
+	return(execute(`sudo shutdown -r now &`))
+}
+
+
+
+//DICT:GET:subscriptions: Returns a list of subscriptions available on the server
+get.subscriptions = function() {
+	var current = get.subscribe();
+	var server = getBrand('server_url') || execute (`sudo -u www-data php /var/www/moodle/local/chat_attachments/get_server_url.php`);
+	try {
+		var data = JSON.parse(execute(`curl -sL ${server}/chathost/link/openwell`));
+		var response = [];
+		for (var record of data) {
+			var isSelected = false;
+			if (current === record.package) {
+				isSelected = true;
+			}
+			if (record['is_slim']) {
+				response.push({name:record.package,value:`${server}/chathost/link/openwell?packageName=${encodeURI(record.package)}`,isSelected:isSelected});
+			}
+		}
+		return (response);
+ 	}
+ 	catch(err) {
+ 		return({status:404,message:"Server URL is not reachable"});
+ 	}
+}
+//DICT:GET:package: Returns the current openwell content package name
+get.package = function() {
+	try {
+		var languages = require("/var/www/enhanced/content/www/assets/content/languages.json");
+		var language = languages[0].codes[0].substring(0,2).toLowerCase();
+		var main = require(`/var/www/enhanced/content/www/assets/content/${language}/data/main.json`);
+		return(main.itemName);
+	}
+	catch (err){
+		return (204);
+	}
+}
+//DICT:GET:packagestatus: Returns the current number of missing items in openwell content package
+get.packagestatus = function() {
+	return(execute(`grep 'Failed Item Count' /tmp/loadContent.log | cut -d":" -f2`));
+}
+
+//DICT:GET:subscribe: Returns the current openwell content subscription 
+get.subscribe = function() {
+	try {
+		var subscribe = require("/var/www/enhanced/content/www/assets/content/subscription.json");
+		return(decodeURI(subscribe.packagesAPIFeed.split('packageName=')[1]));
+	}
+	catch (err){
+		return (204);
+	}
+}
+//DICT:SET:subscribe (URL): Set a new subscription: https://SERVERNAME/api/
+set.subscribe = function(json) {
+	var value = {packagesAPIFeed:json.value,lastUpdated:1};
+	execute('sudo touch /var/www/enhanced/content/www/assets/content/subscription.json')
+	execute('sudo chmod 666 /var/www/enhanced/content/www/assets/content/subscription.json')
+	fs.writeFileSync('/var/www/enhanced/content/www/assets/content/subscription.json',JSON.stringify(value));
+	return ('Subscribed to ' + json.value);
 }
 
 //DICT:SET:openwelldownload (URL): Download the file and install into OpenWell 
@@ -195,18 +294,29 @@ set.openwelldownload = function(json) {
 
 //DICT:DO:openwellrefresh: Check for missing pieces from a openwelldownload and get those pieces
 doCommand.openwellrefresh = function() {
-	exec(`sudo /usr/bin/python /usr/local/connectbox/bin/lazyLoader.py >/tmp/loadContent.log 2>&1`);
-	return ('Downloading content has begun.');
-}
-
-//DICT:DO:openwellusb: Trigger a loading of OpenWell content from USB (openwell.zip OR semi-structured media)
-doCommand.openwellusb = function() {
-	if (fs.existsSync('/media/usb0/openwell.zip')) {
-		return(execute(`scripts/openwellunzip.sh`));
+	var processes = execute(`pgrep -af 'lazyLoader.py'`);
+	if (!processes.includes('python')) {
+		exec(`sudo /usr/bin/python /usr/local/connectbox/bin/lazyLoader.py >/tmp/loadContent.log 2>&1`);
+		return ('Downloading content has begun.');
 	}
 	else {
+		return ('Downloading is already running.')	
+	}
+}
+
+//DICT:DO:openwellusb: Trigger a loading of OpenWell content from USB (/USB/package OR /USB/content semi-structured media)
+doCommand.openwellusb = function() {
+	if (fs.existsSync('/media/usb0/package/language.json')) {
+		execute('sudo rm -rf /var/www/enhanced/content/www/assets/content/*');
+		execute(`sudo ln -s /media/usb0/package/* /var/www/enhanced/content/www/assets/content/`)
+		return('Loading Package Found at /USB/package.');
+	}
+	else if (fs.existsSync('/media/usb0/content')) {
 		exec('sudo python /usr/local/connectbox/bin/enhancedInterfaceUSBLoader.py >/tmp/loadContent.log 2>&1');
-		return ('Loading content has begun.');	
+		return ('Loading content from /USB/content.');	
+	}
+	else {
+		return ({status:404,message:`No USB content found. Can't Load Anything.`})
 	}
 }
 
@@ -216,14 +326,31 @@ set.coursedownload = function(json) {
 	return(execute(`sudo -u www-data /usr/bin/php /var/www/moodle/admin/cli/restore_backup.php --file=/tmp/download.mbz --categoryid=1`));
 }
 
-//DICT:DO:courseusb: Trigger a loading of Moodle content (*.mbz) from USB
-doCommand.courseusb = function() {
-	execute(`sudo -u www-data /usr/bin/php /var/www/moodle/admin/cli/restore_courses_directory.php /media/usb0/ >/tmp/loadContent.log 2>&1`);
+//DICT:GET:coursesonusb: Get list of .mbz Moodle course files on /USB/courses
+get.coursesonusb = function() {
+	var response = [];
+	try {
+		var filenames = fs.readdirSync('/media/usb0/courses');
+		for (var file of filenames) {
+			if (file.includes('.mbz')) {
+				response.push(file)
+			}
+		}
+	}
+	catch (err){
+		//console.log(err);
+	}
+	return (response);
+}
+
+//DICT:SET:courseusb (filename): Trigger a loading of Moodle content from /USB/courses
+set.courseusb = function(json) {
+	execute(`sudo -u www-data php /var/www/moodle/admin/cli/restore_backup.php -f="/media/usb0/courses/${json.value}" -c=1 >/tmp/loadContent.log 2>&1`);
 	return true;
 }
 
-//DICT:DO:wipe (password): Erase SD Card -- password is wipethebox
-doCommand.wipe = function(json) {
+//DICT:SET:wipe (password): Erase SD Card -- password is wipethebox
+set.wipe = function(json) {
     if (json.value === 'wipethebox') {
     	exec(`scripts/wipe.sh &`);
 	    return true;
@@ -262,15 +389,18 @@ function getBrand(key) {
 	return(brand[key] || 0);
 }
 
-//DICT:SET:brand: Set value in brand.txt where value is like Image=connectbox_logo.png
+//DICT:SET:brand (key=value): Set value in brand.txt where value is like Image=connectbox_logo.png
 function setBrand(body) {
 	var brand = JSON.parse(fs.readFileSync('/usr/local/connectbox/brand.txt'));
 	var key = body.value.split('=')[0];
 	var val = body.value.split('=')[1];
-	if (typeof getBrand(key) === 'number') {
+	try {
 		brand[key] = parseInt(val);
+		if (isNaN(brand[key])) {
+			brand[key] = val;
+		}
 	}
-	else {
+	catch {
 		brand[key] = val;
 	}
 	// One key sets a few lcd_pages_stats values so loop through and update all of them
@@ -284,6 +414,53 @@ function setBrand(body) {
 	}
 	fs.writeFileSync('/usr/local/connectbox/brand.txt',JSON.stringify(brand));
 	return(body.value);
+}
+
+//DICT:GET:weblog: Get logs since last get
+get.weblog = function (json){
+	try {
+		var logString = fs.readFileSync('/var/log/connectbox/connectbox_enhanced.log','utf-8');
+		var logArray = logString.split('\n');
+		return (JSON.stringify(logArray));
+	}
+	catch (err) {
+		return(JSON.stringify(['']));
+	}
+}
+//DICT:SET:weblog (json): Send a single web log item
+set.weblog = function (json){
+	try {
+		json.value = JSON.parse(json.value);
+		json.value.timestamp = Math.round(Date.now() / 1000);
+		fs.appendFileSync('/var/log/connectbox/connectbox_enhanced.log',JSON.stringify(json.value) + '\n');
+		return true;
+ 	}
+ 	catch (err) {
+ 		return false;
+ 	}
+}
+
+//DICT:GET:disable_openwell_chat: Get status of disabling chat
+get.disable_openwell_chat = function (json){
+	try {
+		var chat = require('/var/www/enhanced/content/www/assets/content/config.json');
+		return (chat["disable_openwell_chat"]);
+	}
+	catch (err) {
+		return false;
+	}
+}
+//DICT:SET:disable_openwell_chat (json): 1 is disabled and 0 is enabled
+set.disable_openwell_chat = function (json){
+	try {
+		var chat = require('/var/www/enhanced/content/www/assets/content/config.json');
+		chat["disable_openwell_chat"] = json.value;
+		fs.writeFileSync('/var/www/enhanced/content/www/assets/content/config.json',JSON.stringify(chat));
+		return true;
+ 	}
+ 	catch (err) {
+ 		return false;
+ 	}
 }
 
 function execute(command) {
