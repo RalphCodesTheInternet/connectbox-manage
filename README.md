@@ -52,6 +52,8 @@ Log into Moodle with an administration account.  First, we need to create a cust
 - Click Add functions
     - Add the following functions:
         - core_user_get_users
+        - core_user_get_users_by_field
+        - core_user_create_users
     - Click Add functions
 
 Now we need to generate the token.
