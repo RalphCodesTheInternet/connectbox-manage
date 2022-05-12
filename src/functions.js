@@ -478,6 +478,13 @@ set.disable_openwell_chat = function (json){
 /**
  * Moodle functions
  */
+//DICT:GET:lms_courses (id?): Get a list of courses from the LMS. If id is supplied, get the specific course.
+get.lms_courses = function (id) {
+  if (id) {
+    return lms.get_course(id).then((response) =>  response);
+  }
+  return lms.get_courses().then((response) =>  response);
+}
 //DICT:GET:lms_users (id?): Get a list of users from the LMS. If id is supplied, get the specific user.
 get.lms_users = function (id) {
   if (id) {
