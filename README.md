@@ -23,9 +23,9 @@ The API and the CLI will execute new commands found in the functions.js file.  E
   `//DICT:SET:clientssid (string): Client Wi-Fi SSID`
   - DICT indicates the line is self-documenting description
   - GET/SET/DO indicates the type of function
-  - clientssid is the name of the function 
+  - clientssid is the name of the function
   - (string) indicates the type of input expected
-  - Lastly a text description 
+  - Lastly a text description
 
 * A new function should start with `get.` `set.` or `doCommand.` as shown in functions.js
 ```
@@ -39,3 +39,27 @@ get.clientssid = function (){
 * By default the [connectbox-pi repo](https://github.com/ConnectBox/connectbox-pi/blob/master/ansible/roles/enhanced-content/tasks/main.yml) installs these tools in /var/www/enhanced/connectbox-manage and uses [pm2](https://pm2.keymetrics.io/) to serve as process manager.  Helpful commands are: `pm2 status` `pm2 restart all` `pm2 logs`
 * Execute as a nodejs application as shown in the [Installation and Deployment](#installation-and-development) section above.
 * A nodejs docker could be used to run the application.
+
+# Create A Moodle API Token
+
+Log into Moodle with an administration account.  First, we need to create a custom API service:
+
+- Visit Site administration > Plugins > Web services > External services
+- Click Add under Custom Services
+    - Name: Connectbox API
+    - Short Name: connectbox_api
+    - Click Add Service
+- Click Add functions
+    - Add the following functions:
+        - core_user_get_users
+    - Click Add functions
+
+Now we need to generate the token.
+
+- Visit Site administration > Plugins > Web services > Manage tokens
+- Click Add at the bottom
+    - Select Admin User from User
+    - Select Connectbox API from Service
+    - Click Save Changes
+
+Lastly, add the token to functions.js.

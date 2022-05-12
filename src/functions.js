@@ -1,11 +1,12 @@
 const
-    configs = require('./configs.js'),
+  configs = require('./configs.js'),
 	{execSync}= require("child_process"),
 	{ exec } = require('child_process'),
 	fs = require('fs'),
+  lms = require('./lms-api'),
 	request = require('request'),
-    Logger = require('./logger.js'),
-    logger = new Logger(configs.logging);
+  Logger = require('./logger.js'),
+  logger = new Logger(configs.logging);
 
 var get = {};
 var set = {};
@@ -18,6 +19,14 @@ var logSources = {
 	"loadContent": 'cat /tmp/loadContent.log',
 	"sync": 'cat /tmp/push_messages.log'
 }
+/**
+ * The url to the LMS
+ */
+lms.url = 'http://learn.dev-staging.thewellcloud.cloud/webservice/rest/server.php';
+/**
+ * The web access token from the LMS
+ */
+lms.token = '45827d91215f7cbc962971ee7047e4a6';
 
 function auth (password) {
 	console.log(auth);
@@ -58,7 +67,7 @@ set.appassphrase = function (json){
 	}
 	else {
 		// Remove existing passphrase
-		return (execute(`sudo sed -i -e "/wpa_passphrase=/ s/wpa_passphrase=.*//" /etc/hostapd/hostapd.conf`))	
+		return (execute(`sudo sed -i -e "/wpa_passphrase=/ s/wpa_passphrase=.*//" /etc/hostapd/hostapd.conf`))
 	}
 }
 
@@ -160,7 +169,7 @@ set.wifirestart = function (json){
 		response += execute(`sudo systemctl restart hostapd`);
 		response += execute(`sudo systemctl status hostapd`);
 	}
-	return (response);  
+	return (response);
 }
 
 //DICT:GET:wifistatus: Retrieve current wifi adaptor information
@@ -179,7 +188,7 @@ get.wifistatus = function (){
 
 //DICT:GET:hostname: Box Hostname
 get.hostname = function (){
-	return (execute(`cat /etc/hostname`))  
+	return (execute(`cat /etc/hostname`))
 }
 //DICT:SET:hostname: Box Hostname
 set.hostname = function (json){
@@ -267,7 +276,7 @@ get.packagestatus = function() {
 	return(execute(`grep 'Failed Item Count' /tmp/loadContent.log | cut -d":" -f2`));
 }
 
-//DICT:GET:subscribe: Returns the current openwell content subscription 
+//DICT:GET:subscribe: Returns the current openwell content subscription
 get.subscribe = function() {
 	try {
 		var subscribe = require("/var/www/enhanced/content/www/assets/content/subscription.json");
@@ -286,7 +295,7 @@ set.subscribe = function(json) {
 	return ('Subscribed to ' + json.value);
 }
 
-//DICT:SET:openwelldownload (URL): Download the file and install into OpenWell 
+//DICT:SET:openwelldownload (URL): Download the file and install into OpenWell
 set.openwelldownload = function(json) {
 	exec(`sudo /usr/bin/python /usr/local/connectbox/bin/lazyLoader.py ${json.value} >/tmp/loadContent.log 2>&1`);
 	return ('Downloading content has begun.');
@@ -300,7 +309,7 @@ doCommand.openwellrefresh = function() {
 		return ('Downloading content has begun.');
 	}
 	else {
-		return ('Downloading is already running.')	
+		return ('Downloading is already running.')
 	}
 }
 
@@ -313,14 +322,14 @@ doCommand.openwellusb = function() {
 	}
 	else if (fs.existsSync('/media/usb0/content')) {
 		exec('sudo python /usr/local/connectbox/bin/enhancedInterfaceUSBLoader.py >/tmp/loadContent.log 2>&1');
-		return ('Loading content from /USB/content.');	
+		return ('Loading content from /USB/content.');
 	}
 	else {
 		return ({status:404,message:`No USB content found. Can't Load Anything.`})
 	}
 }
 
-//DICT:SET:coursedownload (URL): Download the Moodle course and install 
+//DICT:SET:coursedownload (URL): Download the Moodle course and install
 set.coursedownload = function(json) {
 	execute(`sudo wget -O /tmp/download.mbz ${json.value} >/tmp/loadContent.log 2>&1`);
 	return(execute(`sudo -u www-data /usr/bin/php /var/www/moodle/admin/cli/restore_backup.php --file=/tmp/download.mbz --categoryid=1`));
@@ -461,6 +470,20 @@ set.disable_openwell_chat = function (json){
  	catch (err) {
  		return false;
  	}
+}
+
+/**
+ * Moodle functions
+ */
+//DICT:GET:learn_users: Get a list of users from the LMS
+get.learn_users = function () {
+  lms.get_users().then((response) =>  console.log(response));
+  return '';
+}
+//DICT:GET:learn_user (id): Get a user from the LMS
+get.learn_user = function (id) {
+  lms.get_user(id).then((response) =>  console.log(response));
+  return '';
 }
 
 function execute(command) {

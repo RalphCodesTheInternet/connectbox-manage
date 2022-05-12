@@ -26,8 +26,11 @@ else {
 			else if (key.toLowerCase() === 'logs') {
 				console.log(functions.getLogs(value));
 			}
+			else if (value) {
+				console.log(functions.get[key](value));
+			}
 			else {
-				console.log(functions.get[key]());		
+				console.log(functions.get[key]());
 			}
 		break;
 		case 'set':
@@ -37,11 +40,11 @@ else {
 				console.log(functions.setBrand(payload));
 			}
 			else {
-				console.log(functions.set[key]({value:value}));		
+				console.log(functions.set[key]({value:value}));
 			}
 		break;
 		case 'do':
-				console.log(functions.doCommand[key]({value:value}));		
+				console.log(functions.doCommand[key]({value:value}));
 		break;
 	}
 }
