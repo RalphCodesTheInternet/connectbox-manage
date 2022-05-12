@@ -37,8 +37,8 @@ lms.get_courses = async () => {
 /**
  * Get a specific course
  *
- * @param  {int}      id  The id of the course
- * @return {Promise}      The JSOn response
+ * @param  {integer}  id  The id of the course
+ * @return {Promise}      The JSON response
  */
 lms.get_course = async (id) =>  {
   if (!lms.can_make_request()) {
@@ -58,6 +58,29 @@ lms.get_course = async (id) =>  {
   const response = await axios.post(lms.url, null, {params: params});
   return response.data;
 }
+/**
+ * Get a list of students enrolled in a class
+ *
+ * @param  {integer}  id  The id for the course
+ * @return {Promise}      The JSON response
+ */
+lms.get_course_roster = async (id)  =>  {
+  if (!lms.can_make_request()) {
+    return 'You need to set the url and token!';
+  }
+  if (!id) {
+    return 'You must supply a vaild id!';
+  }
+
+  const params = {
+    'wstoken': lms.token,
+    'wsfunction': 'core_enrol_get_enrolled_users',
+    'moodlewsrestformat': 'json',
+    'courseid': id,
+  };
+  const response = await axios.post(lms.url, null, {params: params});
+  return response.data;
+};
 /**
  * Get all the users of the LMS.
  *

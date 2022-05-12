@@ -34,6 +34,11 @@ router.get('/logs/:log', function get(req, res) {
 /**
  * Routes for LMS
  */
+router.get('/lms/courses/:id(\\d+)/users', async function get(req, res) {
+  const result = await functions.get['lms_courses_roster'](req.params.id);
+  const data = {code:0,result: result};
+  res.send(data);
+});
 router.get('/lms/:key/:id(\\d+)', async function get(req, res) {
   if (!('lms_'+req.params.key in functions.get)) {
     res.sendStatus(404);

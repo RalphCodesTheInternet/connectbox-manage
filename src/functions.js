@@ -485,6 +485,10 @@ get.lms_courses = function (id) {
   }
   return lms.get_courses().then((response) =>  response);
 }
+//DICT:GET:lms_courses_roster (course_id): Get a list of users in the given course.
+get.lms_courses_roster = function (id) {
+  return lms.get_course_roster(id).then((response) =>  response);
+}
 //DICT:GET:lms_users (id?): Get a list of users from the LMS. If id is supplied, get the specific user.
 get.lms_users = function (id) {
   if (id) {
