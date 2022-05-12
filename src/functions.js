@@ -9,6 +9,7 @@ const
   logger = new Logger(configs.logging);
 
 var get = {};
+var del = {};
 var set = {};
 var doCommand = {};
 
@@ -491,6 +492,11 @@ set.learn_user = function (json) {
   lms.post_user(data).then((response) =>  console.log(response));
   return '';
 }
+//DICT:DEL:learn_user (id): Delete a user from the LMS
+del.learn_user = function (id) {
+  lms.delete_user(id).then((response) =>  console.log(response));
+  return '';
+}
 
 function execute(command) {
 	var response = ''
@@ -505,6 +511,7 @@ function execute(command) {
 module.exports = {
 	auth,
 	get,
+  del,
 	set,
 	doCommand,
 	getLogs,

@@ -114,5 +114,31 @@ lms.post_user = async (data)  =>  {
   const response = await axios.post(lms.url, null, {params: params});
   return response.data;
 };
+/**
+ * Delete a given user
+ *
+ * @param  {integer}  id  The id of the user to delete.
+ * @return {Promise}      The JSON response
+ */
+lms.delete_user = async (id)  =>  {
+  if (!lms.can_make_request()) {
+    return 'You need to set the url and token!';
+  }
+  if (!id) {
+    return 'You must supply a vaild id!';
+  }
+
+  const params = {
+    'wstoken': lms.token,
+    'wsfunction': 'core_user_delete_users',
+    'moodlewsrestformat': 'json',
+    'userids': [id],
+  };
+  const response = await axios.post(lms.url, null, {params: params});
+  if (!response.data) {
+    return 'The user has been deleted.';
+  }
+  return response.data;
+};
 
 module.exports = lms;

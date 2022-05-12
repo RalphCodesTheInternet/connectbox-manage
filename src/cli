@@ -33,6 +33,14 @@ else {
 				console.log(functions.get[key]());
 			}
 		break;
+		case 'del':
+			if (value) {
+				console.log(functions.del[key](value));
+			}
+			else {
+				console.log(functions.del[key]());
+			}
+		break;
 		case 'set':
 			if (key.toLowerCase() === 'brand') {
 				var values = value.split('=');
