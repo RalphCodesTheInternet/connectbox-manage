@@ -485,6 +485,12 @@ get.learn_user = function (id) {
   lms.get_user(id).then((response) =>  console.log(response));
   return '';
 }
+//DICT:SET:learn_user (json): Create a new user for the LMS
+set.learn_user = function (json) {
+  const data = JSON.parse(json.value);
+  lms.post_user(data).then((response) =>  console.log(response));
+  return '';
+}
 
 function execute(command) {
 	var response = ''
