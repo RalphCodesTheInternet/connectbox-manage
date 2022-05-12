@@ -108,10 +108,43 @@ lms.post_user = async (data)  =>  {
   const optionals = [
     'maildisplay', 'city', 'country', 'timezone', 'description', 'middlename',
     'alternatename', 'url', 'icq', 'skype', 'aim', 'yahoo', 'msn', 'institution', 'department',
-    'phone1', 'phone2', 'address', 'lang', 'mailformat'
+    'phone1', 'phone2', 'address', 'lang', 'mailformat', 'interests'
   ];
   optionals.filter((field) => (field in data)).forEach((field) => params['users[0]['+field+']'] = data[field]);
   const response = await axios.post(lms.url, null, {params: params});
+  return response.data;
+};
+/**
+ * Update the gven user
+ *
+ * @param  {integer}  id    The user's id
+ * @param  {object}   data  The data to be updated
+ * @return {Promise}        The JSON response
+ */
+lms.put_user = async (id, data) =>  {
+  const whitelist = [
+    'username', 'maildisplay', 'city', 'country', 'timezone', 'description', 'middlename',
+    'alternatename', 'url', 'icq', 'skype', 'aim', 'yahoo', 'msn', 'institution', 'department',
+    'phone1', 'phone2', 'address', 'lang', 'mailformat', 'suspended', 'password', 'firstname',
+    'lastname', 'email', 'interests'
+  ];
+  if (!lms.can_make_request()) {
+    return 'You need to set the url and token!';
+  }
+  if (!id) {
+    return 'You must provide a valid id.';
+  }
+  const params = {
+    'wstoken': lms.token,
+    'wsfunction': 'core_user_update_users',
+    'moodlewsrestformat': 'json',
+    'users[0][id]': id,
+  };
+  whitelist.filter((field) => (field in data)).forEach((field) => params['users[0]['+field+']'] = data[field]);
+  const response = await axios.post(lms.url, null, {params: params});
+  if (!response.data) {
+    return 'The user has been updated.';
+  }
   return response.data;
 };
 /**

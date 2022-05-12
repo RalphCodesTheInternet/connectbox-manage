@@ -494,6 +494,19 @@ post.lms_users = function (json) {
   }
   return lms.post_user(data).then((response) =>  response);
 }
+//DICT:PUT:lms_users (json): Update an existing user for the LMS. JSON must have an id set.
+put.lms_users = function (json) {
+  let data = json;
+  try {
+    data = JSON.parse(json);
+  } catch (e) {
+  }
+  if (!('id' in data)) {
+    return 'You must provide a valid id!';
+  }
+  const id = data.id;
+  return lms.put_user(id, data).then((response) =>  response);
+}
 //DICT:DEL:lms_users (id): Delete a user from the LMS
 del.lms_users = function (id) {
   return lms.delete_user(id).then((response) =>  response);

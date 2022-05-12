@@ -40,7 +40,7 @@ router.get('/lms/:key/:id(\\d+)', async function get(req, res) {
     return;
   }
   const result = await functions.get['lms_'+req.params.key](req.params.id);
-  var data = {code:0,result: result};
+  const data = {code:0,result: result};
   res.send(data);
 });
 router.get('/lms/:key', async function get(req, res) {
@@ -49,7 +49,7 @@ router.get('/lms/:key', async function get(req, res) {
     return;
   }
   const result = await functions.get['lms_'+req.params.key]();
-  var data = {code:0,result: result};
+  const data = {code:0,result: result};
   res.send(data);
 });
 router.post('/lms/:key', async function post(req, res) {
@@ -58,7 +58,18 @@ router.post('/lms/:key', async function post(req, res) {
     return;
   }
   const result = await functions.post['lms_'+req.params.key](req.body);
-  var data = {code:0,result: result};
+  const data = {code:0,result: result};
+  res.send(data);
+});
+router.put('/lms/:key/:id(\\d+)', async function put(req, res) {
+  if (!('lms_'+req.params.key in functions.put)) {
+    res.sendStatus(404);
+    return;
+  }
+  const payload = req.body;
+  payload['id'] = req.params.id;
+  const result = await functions.put['lms_'+req.params.key](payload);
+  const data = {code:0,result: result};
   res.send(data);
 });
 router.delete('/lms/:key/:id(\\d+)', async function del(req, res) {
@@ -67,7 +78,7 @@ router.delete('/lms/:key/:id(\\d+)', async function del(req, res) {
     return;
   }
   const result = await functions.del['lms_'+req.params.key](req.params.id);
-  var data = {code:0,result: result};
+  const data = {code:0,result: result};
   res.send(data);
 });
 
