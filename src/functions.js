@@ -9,6 +9,8 @@ const
   logger = new Logger(configs.logging);
 
 var get = {};
+var post = {};
+var put = {};
 var del = {};
 var set = {};
 var doCommand = {};
@@ -476,26 +478,25 @@ set.disable_openwell_chat = function (json){
 /**
  * Moodle functions
  */
-//DICT:GET:learn_users: Get a list of users from the LMS
-get.learn_users = function () {
-  lms.get_users().then((response) =>  console.log(response));
-  return '';
+//DICT:GET:lms_users (id?): Get a list of users from the LMS. If id is supplied, get the specific user.
+get.lms_users = function (id) {
+  if (id) {
+    return lms.get_user(id).then((response) =>  response);
+  }
+  return lms.get_users().then((response) =>  response);
 }
-//DICT:GET:learn_user (id): Get a user from the LMS
-get.learn_user = function (id) {
-  lms.get_user(id).then((response) =>  console.log(response));
-  return '';
+//DICT:POST:lms_users (json): Create a new user for the LMS
+post.lms_users = function (json) {
+  let data = json;
+  try {
+    data = JSON.parse(json);
+  } catch (e) {
+  }
+  return lms.post_user(data).then((response) =>  response);
 }
-//DICT:SET:learn_user (json): Create a new user for the LMS
-set.learn_user = function (json) {
-  const data = JSON.parse(json.value);
-  lms.post_user(data).then((response) =>  console.log(response));
-  return '';
-}
-//DICT:DEL:learn_user (id): Delete a user from the LMS
-del.learn_user = function (id) {
-  lms.delete_user(id).then((response) =>  console.log(response));
-  return '';
+//DICT:DEL:lms_users (id): Delete a user from the LMS
+del.lms_users = function (id) {
+  return lms.delete_user(id).then((response) =>  response);
 }
 
 function execute(command) {
@@ -511,6 +512,8 @@ function execute(command) {
 module.exports = {
 	auth,
 	get,
+  post,
+  put,
   del,
 	set,
 	doCommand,

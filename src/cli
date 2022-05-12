@@ -26,19 +26,51 @@ else {
 			else if (key.toLowerCase() === 'logs') {
 				console.log(functions.getLogs(value));
 			}
-			else if (value) {
-				console.log(functions.get[key](value));
+			else if (key.toLowerCase().startsWith('lms_')) {
+				const callback = async ()	=>	{
+					const res = await functions.get[key](value);
+					console.log(res);
+				};
+				callback();
 			}
 			else {
 				console.log(functions.get[key]());
 			}
 		break;
 		case 'del':
-			if (value) {
-				console.log(functions.del[key](value));
+			if (key.toLowerCase().startsWith('lms_')) {
+				const callback = async ()	=>	{
+					const res = await functions.del[key](value);
+					console.log(res);
+				};
+				callback();
 			}
 			else {
 				console.log(functions.del[key]());
+			}
+		break;
+		case 'post':
+			if (key.toLowerCase().startsWith('lms_')) {
+				const callback = async ()	=>	{
+					const res = await functions.post[key](value);
+					console.log(res);
+				};
+				callback();
+			}
+			else {
+				console.log(functions.post[key]());
+			}
+		break;
+		case 'put':
+			if (key.toLowerCase().startsWith('lms_')) {
+				const callback = async ()	=>	{
+					const res = await functions.put[key](value);
+					console.log(res);
+				};
+				callback();
+			}
+			else {
+				console.log(functions.put[key]());
 			}
 		break;
 		case 'set':

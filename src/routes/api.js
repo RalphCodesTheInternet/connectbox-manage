@@ -31,6 +31,46 @@ router.get('/logs/:log', function get(req, res) {
 	res.send(data);
 });
 
+/**
+ * Routes for LMS
+ */
+router.get('/lms/:key/:id(\\d+)', async function get(req, res) {
+  if (!('lms_'+req.params.key in functions.get)) {
+    res.sendStatus(404);
+    return;
+  }
+  const result = await functions.get['lms_'+req.params.key](req.params.id);
+  var data = {code:0,result: result};
+  res.send(data);
+});
+router.get('/lms/:key', async function get(req, res) {
+  if (!('lms_'+req.params.key in functions.get)) {
+    res.sendStatus(404);
+    return;
+  }
+  const result = await functions.get['lms_'+req.params.key]();
+  var data = {code:0,result: result};
+  res.send(data);
+});
+router.post('/lms/:key', async function post(req, res) {
+  if (!('lms_'+req.params.key in functions.post)) {
+    res.sendStatus(404);
+    return;
+  }
+  const result = await functions.post['lms_'+req.params.key](req.body);
+  var data = {code:0,result: result};
+  res.send(data);
+});
+router.delete('/lms/:key/:id(\\d+)', async function del(req, res) {
+  if (!('lms_'+req.params.key in functions.del)) {
+    res.sendStatus(404);
+    return;
+  }
+  const result = await functions.del['lms_'+req.params.key](req.params.id);
+  var data = {code:0,result: result};
+  res.send(data);
+});
+
 router.get('/:key', function get(req, res) {
 	var data = {code:0,result: [functions.get[req.params.key]()]};
 	logger.log('debug', `${req.method} ${req.originalUrl}: ${data.result[0]}`);

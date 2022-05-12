@@ -4,7 +4,7 @@ const
 
 var dictionary = execSync('cat ./functions.js |grep DICT:').toString();
 
-var usageTexts = {get:'',del: '',set:'',do:''};
+var usageTexts = {get:'',del: '',post: '',put:'',set:'',do:''};
 for (var row of dictionary.split('\n')) {
 	row = row.replace('//DICT:','');
 	//console.log(row);
@@ -15,15 +15,21 @@ for (var row of dictionary.split('\n')) {
 var text =
 `Usage: connectboxmanage <command> <key> <value>
 	Commands:
-		- get
 		- del
+		- get
+		- post
+		- put
 		- set
 		- do
 
-		Values to get:
-${usageTexts.get}
 		Values to del:
 ${usageTexts.del}
+		Values to get:
+${usageTexts.get}
+		Values to post:
+${usageTexts.post}
+		Values to put:
+${usageTexts.put}
 		Values to set:
 ${usageTexts.set}
 		Actions to do:
