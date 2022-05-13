@@ -445,7 +445,6 @@ get.syncweblog = function (json){
 			}
 			response.push(log);
 		}
-		var 
 		fs.appendFileSync('/var/log/connectbox/connectbox_enhanced.log',JSON.stringify({sync:true,timestamp:Math.round(Date.now() / 1000)}) + '\n');		
 		return (JSON.stringify(response));
 	}
