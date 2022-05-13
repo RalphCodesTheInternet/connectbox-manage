@@ -416,9 +416,34 @@ function setBrand(body) {
 	return(body.value);
 }
 
+//DICT:GET:topten: Get top 10 resources used
+get.topten = function (json){
+	var logString = execute("cat /var/log/connectbox/connectbox_enhanced* |grep mediaIdentifier");
+	var logArray = logString.split('\n');
+	var hits = {hour:[],day:[],week:[],month:[],year:[]};
+	var times = {hour:60*60,day:60*60*24,week: 60*60*24*7, month: 60*60*24*30, year: 60*60*24*365};
+	var now = Math.round(Date.now() / 1000);
+	for (var log of logArray) {
+		try {
+			log = JSON.parse(log);
+			for (var duration of Object.keys(hits)) {
+				if (!log.sync && log.timestamp > now-times[duration]) {
+					hits[duration].push(log.mediaIdentifier);
+				}
+			}
+
+		}
+		catch (err) {
+			continue;
+		}
+	}
+	var response = {hour:topKFrequent(hits["hour"]),day:topKFrequent(hits["day"],10),week:topKFrequent(hits["week"],10),month:topKFrequent(hits["month"],10),year:topKFrequent(hits["year"],10)};
+	return (JSON.stringify(response));
+}
+
 //DICT:GET:weblog: Get logs in last 24 hours
 get.weblog = function (json){
-	var logString = fs.readFileSync('/var/log/connectbox/connectbox_enhanced.log','utf-8');
+	var logString = execute("cat /var/log/connectbox/connectbox_enhanced.log |grep mediaIdentifier");
 	var logArray = logString.split('\n');
 	var response = [];
 	for (var log of logArray) {
@@ -436,7 +461,7 @@ get.weblog = function (json){
 }
 //DICT:GET:syncweblog: Get logs since last get
 get.syncweblog = function (json){
-	var logString = fs.readFileSync('/var/log/connectbox/connectbox_enhanced.log','utf-8');
+	var logString = execute("cat /var/log/connectbox/connectbox_enhanced* |grep mediaIdentifier");
 	var logArray = logString.split('\n');
 	var response = [];
 	for (var log of logArray) {
@@ -531,6 +556,22 @@ function boolify(value) {
 	}
 }
 
+function topKFrequent(arrayOfStrings, k) {
+	// Takes in arrayOfStrings (titles of content) and returns top k most frequent items in the list
+    let hash = {}
+    for (let key of arrayOfStrings) {
+        if (!hash[key]) hash[key] = 0
+        hash[key]+= 1 || 1;
+    }
+    const hashToArray = Object.entries(hash)
+    const sortedArray = hashToArray.sort((a,b) => b[1] - a[1])
+    const sortedElements = sortedArray.map(val => val[0])
+    var response = [];
+    for (var data of sortedArray.slice(0, k)) {
+    	response.push({resource:data[0],count:data[1]})
+    }
+    return response;
+}
 module.exports = {
 	auth,
 	get,
