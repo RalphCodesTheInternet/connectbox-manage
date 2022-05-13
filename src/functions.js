@@ -443,7 +443,7 @@ get.topten = function (json){
 
 //DICT:GET:weblog: Get logs in last 24 hours
 get.weblog = function (json){
-	var logString = execute("cat /var/log/connectbox/connectbox_enhanced.log |grep mediaIdentifier");
+	var logString = execute("cat /var/log/connectbox/connectbox_enhanced* |grep mediaIdentifier");
 	var logArray = logString.split('\n');
 	var response = [];
 	for (var log of logArray) {
@@ -477,7 +477,7 @@ get.syncweblog = function (json){
 		}
 	}
 	if (response.length > 0) {
-		fs.appendFileSync('/var/log/connectbox/connectbox_enhanced.log',JSON.stringify({sync:true,timestamp:Math.round(Date.now() / 1000)}) + '\n');
+		fs.appendFileSync('/var/log/connectbox/connectbox_enhanced.json',JSON.stringify({sync:true,timestamp:Math.round(Date.now() / 1000)}) + '\n');
 	}
 	return (JSON.stringify(response));
 }
@@ -485,7 +485,7 @@ get.syncweblog = function (json){
 set.weblog = function (json){
 	try {
 		json.value.timestamp = Math.round(Date.now() / 1000);
-		fs.appendFileSync('/var/log/connectbox/connectbox_enhanced.log',JSON.stringify(json.value) + '\n');
+		fs.appendFileSync('/var/log/connectbox/connectbox_enhanced.json',JSON.stringify(json.value) + '\n');
 		return true;
  	}
  	catch (err) {
