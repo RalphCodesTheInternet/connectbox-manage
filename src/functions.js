@@ -3,6 +3,7 @@ const
 	{execSync}= require("child_process"),
 	{ exec } = require('child_process'),
 	fs = require('fs'),
+	moment = require('moment'),
 	request = require('request'),
     Logger = require('./logger.js'),
     logger = new Logger(configs.logging);
@@ -416,7 +417,7 @@ function setBrand(body) {
 	return(body.value);
 }
 
-//DICT:GET:topten: Get top 10 resources used
+//DICT:GET:topten: Get top 10 Content Viewing Logs
 get.topten = function (json){
 	var logString = execute("cat /var/log/connectbox/connectbox_enhanced* |grep mediaIdentifier");
 	var logArray = logString.split('\n');
@@ -437,11 +438,50 @@ get.topten = function (json){
 			continue;
 		}
 	}
-	var response = {hour:topKFrequent(hits["hour"]),day:topKFrequent(hits["day"],10),week:topKFrequent(hits["week"],10),month:topKFrequent(hits["month"],10),year:topKFrequent(hits["year"],10)};
-	return (JSON.stringify(response));
+	var response = {hour:topKFrequent(hits["hour"],10),day:topKFrequent(hits["day"],10),week:topKFrequent(hits["week"],10),month:topKFrequent(hits["month"],10),year:topKFrequent(hits["year"],10)};
+	return (response);
+}
+//DICT:GET:stats: Get Detailed Content Viewing Logs By Period
+get.stats = function (json){
+	var logString = execute("cat /var/log/connectbox/connectbox_enhanced* |grep mediaIdentifier");
+	var logArray = logString.split('\n');
+	var hits = {week:{},month:{},year:{}};
+	for (var log of logArray) {
+		try {
+			console.log("=============")
+			console.log(log);
+			log = JSON.parse(log);
+			var logDates = {
+				year:moment(log.timestamp*1000).format('YYYY'),
+				month:moment(log.timestamp*1000).format('YYYYMM'),
+				week:moment(log.timestamp*1000).format('YYYY') + 'W' + moment(log.timestamp*1000).isoWeek()
+			};
+			if (!hits.year[logDates.year]) { hits.year[logDates.year] =[] }
+			if (!hits.month[logDates.month]) { hits.month[logDates.month] =[] }
+			if (!hits.week[logDates.week]) { hits.week[logDates.week] =[] }
+			hits.year[logDates.year].push(log.mediaIdentifier)
+			hits.month[logDates.month].push(log.mediaIdentifier)
+			hits.week[logDates.week].push(log.mediaIdentifier)
+		}
+		catch (err) {
+			console.log(log,err)
+			continue;
+		}
+	}
+	console.log(hits);
+	var response = {week:[],month:[],year:[]};
+	for (var dateType of Object.keys(hits)) {
+		console.log(`dateType: ${dateType}`);
+		for (var period of Object.keys(hits[dateType])) {
+			console.log(`	period: ${period}`);
+			var record = {date: period,stats:topKFrequent(hits[dateType][period],1000)}
+			response[dateType].push(record);
+		}
+	}
+	return (response);
 }
 
-//DICT:GET:weblog: Get logs in last 24 hours
+//DICT:GET:weblog: Get all Content Viewing Logs
 get.weblog = function (json){
 	var logString = execute("cat /var/log/connectbox/connectbox_enhanced* |grep mediaIdentifier");
 	var logArray = logString.split('\n');
@@ -449,7 +489,7 @@ get.weblog = function (json){
 	for (var log of logArray) {
 		try {
 			log = JSON.parse(log);
-			if (!log.sync && log.timestamp > Math.round(Date.now() / 1000) - 60*60*24) {
+			if (!log.sync && log.timestamp) {
 				response.push(log);
 			}
 		}
@@ -457,9 +497,9 @@ get.weblog = function (json){
 			continue;
 		}
 	}
-	return (JSON.stringify(response));
+	return (response);
 }
-//DICT:GET:syncweblog: Get logs since last get
+//DICT:GET:syncweblog: Get Content Viewing Logs since last get
 get.syncweblog = function (json){
 	var logString = execute("cat /var/log/connectbox/connectbox_enhanced* |grep mediaIdentifier");
 	var logArray = logString.split('\n');
@@ -479,9 +519,9 @@ get.syncweblog = function (json){
 	if (response.length > 0) {
 		fs.appendFileSync('/var/log/connectbox/connectbox_enhanced.json',JSON.stringify({sync:true,timestamp:Math.round(Date.now() / 1000)}) + '\n');
 	}
-	return (JSON.stringify(response));
+	return (response);
 }
-//DICT:SET:weblog (json): Send a single web log item
+//DICT:SET:weblog (json): Send a single Content Viewing Log
 set.weblog = function (json){
 	try {
 		json.value.timestamp = Math.round(Date.now() / 1000);

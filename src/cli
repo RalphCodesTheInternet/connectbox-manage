@@ -27,7 +27,13 @@ else {
 				console.log(functions.getLogs(value));
 			}
 			else {
-				console.log(functions.get[key]());		
+				var response = functions.get[key]();
+				if (typeof response === 'object') {
+					console.log(JSON.stringify(response))
+				}
+				else {
+					console.log(response);
+				}
 			}
 		break;
 		case 'set':
