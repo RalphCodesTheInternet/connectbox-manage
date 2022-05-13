@@ -424,7 +424,7 @@ get.weblog = function (json){
 	for (var log of logArray) {
 		try {
 			log = JSON.parse(log);
-			if (log.timestamp > Math.round(Date.now() / 1000) - 60*60*24) {
+			if (!log.sync && log.timestamp > Math.round(Date.now() / 1000) - 60*60*24) {
 				response.push(log);
 			}
 		}
