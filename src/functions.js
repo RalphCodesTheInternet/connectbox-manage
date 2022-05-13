@@ -476,7 +476,9 @@ get.syncweblog = function (json){
 			continue;
 		}
 	}
-	fs.appendFileSync('/var/log/connectbox/connectbox_enhanced.log',JSON.stringify({sync:true,timestamp:Math.round(Date.now() / 1000)}) + '\n');
+	if (response.length > 0) {
+		fs.appendFileSync('/var/log/connectbox/connectbox_enhanced.log',JSON.stringify({sync:true,timestamp:Math.round(Date.now() / 1000)}) + '\n');
+	}
 	return (JSON.stringify(response));
 }
 //DICT:SET:weblog (json): Send a single web log item
