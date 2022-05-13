@@ -440,21 +440,21 @@ set.weblog = function (json){
  	}
 }
 
-//DICT:GET:disable_openwell_chat: Get status of disabling chat
-get.disable_openwell_chat = function (json){
+//DICT:GET:disable_chat: Get status of disabling chat
+get.disable_chat = function (json){
 	try {
 		var chat = require('/var/www/enhanced/content/www/assets/content/config.json');
-		return (chat["disable_openwell_chat"]);
+		return (chat["disable_chat"]);
 	}
 	catch (err) {
 		return false;
 	}
 }
 //DICT:SET:disable_openwell_chat (json): 1 is disabled and 0 is enabled
-set.disable_openwell_chat = function (json){
+set.disable_chat = function (json){
 	try {
 		var chat = require('/var/www/enhanced/content/www/assets/content/config.json');
-		chat["disable_openwell_chat"] = json.value;
+		chat["disable_chat"] = boolify(json.value);
 		fs.writeFileSync('/var/www/enhanced/content/www/assets/content/config.json',JSON.stringify(chat));
 		return true;
  	}
@@ -470,6 +470,15 @@ function execute(command) {
 	}
 	catch (error) {
 		return(error.toString());
+	}
+}
+
+function boolify(value) {
+	if (value == "1" || value === 1 || value.toLowerCase() === 'true') {
+		return 1;
+	}
+	else {
+		return 0;
 	}
 }
 
