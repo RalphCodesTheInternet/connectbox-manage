@@ -430,7 +430,6 @@ get.weblog = function (json){
 //DICT:SET:weblog (json): Send a single web log item
 set.weblog = function (json){
 	try {
-		json.value = JSON.parse(json.value);
 		json.value.timestamp = Math.round(Date.now() / 1000);
 		fs.appendFileSync('/var/log/connectbox/connectbox_enhanced.log',JSON.stringify(json.value) + '\n');
 		return true;
