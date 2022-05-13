@@ -489,6 +489,10 @@ get.lms_courses = function (id) {
 get.lms_courses_roster = function (id) {
   return lms.get_course_roster(id).then((response) =>  response);
 }
+//DICT:DEL:lms_unenroll_user (course_id, user_id): Unenroll a user from a course.
+del.lms_unenroll_user = function (courseid, userid) {
+  return lms.unenroll_course_roster_user(courseid, userid).then((response) =>  response);
+}
 //DICT:GET:lms_users (id?): Get a list of users from the LMS. If id is supplied, get the specific user.
 get.lms_users = function (id) {
   if (id) {

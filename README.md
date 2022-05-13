@@ -70,3 +70,5 @@ Now we need to generate the token.
     - Click Save Changes
 
 Lastly, add the token to functions.js.
+
+NOTE: To unenroll and enroll user, the course must have manual enrollment enabled. [This page](https://docs.moodle.org/400/en/Manual_enrolment) explains how to set up manual enrollment.

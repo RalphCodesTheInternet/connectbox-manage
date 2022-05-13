@@ -13,6 +13,7 @@ args.shift(); // Remove path to script
 var command = args[0];
 var key = args[1];
 var value = args[2];
+var secondValue = args[3];
 
 if (!command || command.toLowerCase() == 'help') {
 	console.log(usage.text);
@@ -28,8 +29,13 @@ else {
 			}
 			else if (key.toLowerCase().startsWith('lms_')) {
 				const callback = async ()	=>	{
-					const res = await functions.get[key](value);
-					console.log(res);
+					let res;
+					if (secondValue) {
+						res = await functions.get[key](value, secondValue);
+					} else {
+						res = await functions.get[key](value);
+					}
+					console.dir(res, { depth:null });
 				};
 				callback();
 			}
@@ -40,8 +46,13 @@ else {
 		case 'del':
 			if (key.toLowerCase().startsWith('lms_')) {
 				const callback = async ()	=>	{
-					const res = await functions.del[key](value);
-					console.log(res);
+					let res;
+					if (secondValue) {
+						res = await functions.del[key](value, secondValue);
+					} else {
+						res = await functions.del[key](value);
+					}
+					console.dir(res, { depth:null });
 				};
 				callback();
 			}
@@ -52,8 +63,13 @@ else {
 		case 'post':
 			if (key.toLowerCase().startsWith('lms_')) {
 				const callback = async ()	=>	{
-					const res = await functions.post[key](value);
-					console.log(res);
+					let res;
+					if (secondValue) {
+						res = await functions.post[key](value, secondValue);
+					} else {
+						res = await functions.post[key](value);
+					}
+					console.dir(res, { depth:null });
 				};
 				callback();
 			}
@@ -64,8 +80,13 @@ else {
 		case 'put':
 			if (key.toLowerCase().startsWith('lms_')) {
 				const callback = async ()	=>	{
-					const res = await functions.put[key](value);
-					console.log(res);
+					let res;
+					if (secondValue) {
+						res = await functions.put[key](value, secondValue);
+					} else {
+						res = await functions.put[key](value);
+					}
+					console.dir(res, { depth:null });
 				};
 				callback();
 			}
