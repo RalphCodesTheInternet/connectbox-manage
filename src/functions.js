@@ -418,39 +418,40 @@ function setBrand(body) {
 
 //DICT:GET:weblog: Get logs in last 24 hours
 get.weblog = function (json){
-	try {
-		var logString = fs.readFileSync('/var/log/connectbox/connectbox_enhanced.log','utf-8');
-		var logArray = logString.split('\n');
-		var response = [];
-		for (var log of logArray) {
+	var logString = fs.readFileSync('/var/log/connectbox/connectbox_enhanced.log','utf-8');
+	var logArray = logString.split('\n');
+	var response = [];
+	for (var log of logArray) {
+		try {
+			log = JSON.parse(log);
 			if (log.timestamp > Math.round(Date.now() / 1000) - 60*60*24) {
 				response.push(log);
 			}
 		}
-		return (JSON.stringify(response));
+		catch (err) {
+			continue;
+		}
 	}
-	catch (err) {
-		return(JSON.stringify(['']));
-	}
+	return (JSON.stringify(response));
 }
 //DICT:GET:syncweblog: Get logs since last get
 get.syncweblog = function (json){
-	try {
-		var logString = fs.readFileSync('/var/log/connectbox/connectbox_enhanced.log','utf-8');
-		var logArray = logString.split('\n');
-		var response = [];
-		for (var log of logArray) {
-			if (log.sync) {
-				response = [];  // Everytime we get a log.sync record, clear the response because this means we already sent everything in the array
-			}
+	var logString = fs.readFileSync('/var/log/connectbox/connectbox_enhanced.log','utf-8');
+	var logArray = logString.split('\n');
+	var response = [];
+	for (var log of logArray) {
+		try {
+			log = JSON.parse(log);
 			response.push(log);
+			if (log.sync) {
+				response = [];
+			}
 		}
-		fs.appendFileSync('/var/log/connectbox/connectbox_enhanced.log',JSON.stringify({sync:true,timestamp:Math.round(Date.now() / 1000)}) + '\n');		
-		return (JSON.stringify(response));
+		catch (err) {
+			continue;
+		}
 	}
-	catch (err) {
-		return(JSON.stringify(['']));
-	}
+	return (JSON.stringify(response));
 }
 //DICT:SET:weblog (json): Send a single web log item
 set.weblog = function (json){
