@@ -450,11 +450,34 @@ get.disable_chat = function (json){
 		return false;
 	}
 }
-//DICT:SET:disable_openwell_chat (json): 1 is disabled and 0 is enabled
+//DICT:SET:disable_chat (json): 1 is disabled and 0 is enabled
 set.disable_chat = function (json){
 	try {
 		var chat = require('/var/www/enhanced/content/www/assets/content/config.json');
 		chat["disable_chat"] = boolify(json.value);
+		fs.writeFileSync('/var/www/enhanced/content/www/assets/content/config.json',JSON.stringify(chat));
+		return true;
+ 	}
+ 	catch (err) {
+ 		return false;
+ 	}
+}
+
+//DICT:GET:disable_stats: Get status of disabling stats
+get.disable_stats = function (json){
+	try {
+		var chat = require('/var/www/enhanced/content/www/assets/content/config.json');
+		return (chat["disable_stats"]);
+	}
+	catch (err) {
+		return false;
+	}
+}
+//DICT:SET:disable_stats (json): 1 is disabled and 0 is enabled
+set.disable_stats = function (json){
+	try {
+		var chat = require('/var/www/enhanced/content/www/assets/content/config.json');
+		chat["disable_stats"] = boolify(json.value);
 		fs.writeFileSync('/var/www/enhanced/content/www/assets/content/config.json',JSON.stringify(chat));
 		return true;
  	}
