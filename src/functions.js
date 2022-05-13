@@ -523,7 +523,7 @@ function execute(command) {
 }
 
 function boolify(value) {
-	if (value == "1" || value === 1 || value.toLowerCase() === 'true') {
+	if (value == "1" || value === 1 || (typeof value === 'string' && value.toLowerCase() === 'true')) {
 		return 1;
 	}
 	else {
