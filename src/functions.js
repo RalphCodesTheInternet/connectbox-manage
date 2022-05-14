@@ -455,8 +455,6 @@ get.stats = function (json){
 	var hits = {week:{},month:{},year:{}};
 	for (var log of logArray) {
 		try {
-			console.log("=============")
-			console.log(log);
 			log = JSON.parse(log);
 			var logDates = {
 				year:moment(log.timestamp*1000).format('YYYY'),
@@ -475,12 +473,12 @@ get.stats = function (json){
 			continue;
 		}
 	}
-	console.log(hits);
+	//console.log(hits);
 	var response = {week:[],month:[],year:[]};
 	for (var dateType of Object.keys(hits)) {
-		console.log(`dateType: ${dateType}`);
+		//console.log(`dateType: ${dateType}`);
 		for (var period of Object.keys(hits[dateType])) {
-			console.log(`	period: ${period}`);
+			//console.log(`	period: ${period}`);
 			var record = {date: period,stats:topKFrequent(hits[dateType][period],1000)}
 			response[dateType].push(record);
 		}
