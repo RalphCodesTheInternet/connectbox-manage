@@ -45,6 +45,18 @@ app.get('/admin/api/logout', function(req,res) {
 	res.sendStatus(200);
 })
 
+app.put('/admin/api/weblog', function(req,res) {
+	try {
+		req.body.value.timestamp = Math.round(Date.now() / 1000);
+		fs.appendFileSync('/var/log/connectbox/connectbox_enhanced.json',JSON.stringify(req.body.value) + '\n');
+		res.sendStatus(200);
+ 	}
+ 	catch (err) {
+ 		console.log(err);
+ 		res.sendStatus(500);
+ 	}
+});
+
 app.get(['/chat','/chat/:lastMessage'], function(req,res) {
 	// Check for lastMessage value, otherwise, get all non expired messages
 	if (!req.params || !req.params.lastMessage) {

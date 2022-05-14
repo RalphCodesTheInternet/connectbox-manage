@@ -521,17 +521,6 @@ get.syncweblog = function (json){
 	}
 	return (response);
 }
-//DICT:SET:weblog (json): Send a single Content Viewing Log
-set.weblog = function (json){
-	try {
-		json.value.timestamp = Math.round(Date.now() / 1000);
-		fs.appendFileSync('/var/log/connectbox/connectbox_enhanced.json',JSON.stringify(json.value) + '\n');
-		return true;
- 	}
- 	catch (err) {
- 		return false;
- 	}
-}
 
 //DICT:GET:disable_chat: Get status of disabling chat
 get.disable_chat = function (json){
