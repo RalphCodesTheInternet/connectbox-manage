@@ -48,13 +48,13 @@ app.get('/admin/api/logout', function(req,res) {
 })
 
 app.put('/admin/api/weblog', function(req,res) {
-	logger.log('debug', `${req.method} ${req.originalUrl}: ${req.body.mediaIdentifier}`);
+	logger.log('debug', `${req.method} ${req.originalUrl}: ${req.body.value.mediaIdentifier}`);
 	try {
 		req.body.value.timestamp = Math.round(Date.now() / 1000);
-		req.body.country = functions.brand['server_siteadmin_country'];
-		req.body.locationName = functions.brand['server_sitename'];
-		req.body.deviceProvider = 'connectbox';
-		req.body.deviceIdentifier = boxid;
+		req.body.value.country = functions.brand['server_siteadmin_country'];
+		req.body.value.locationName = functions.brand['server_sitename'];
+		req.body.value.deviceProvider = 'connectbox';
+		req.body.value.deviceIdentifier = boxid;
 		fs.appendFileSync('/var/log/connectbox/connectbox_enhanced.json',JSON.stringify(req.body.value) + '\n');
 		res.sendStatus(200);
  	}
