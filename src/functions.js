@@ -33,6 +33,11 @@ set.password = function (json){
 	return (true);
 }
 
+//DICT:GET:boxid: Get the boxid (MAC address) of box
+get.boxid = function (){
+	return (execute(`cat /sys/class/net/eth0/address`).replace(/:/g,'-').replace('\n',''));
+}
+
 //DICT:GET:apssid: Access Point SSID
 get.apssid = function (){
 	return (execute(`grep '^ssid=' /etc/hostapd/hostapd.conf | cut -d"=" -f2`))
