@@ -48,6 +48,8 @@ app.get('/admin/api/logout', function(req,res) {
 app.put('/admin/api/weblog', function(req,res) {
 	try {
 		req.body.value.timestamp = Math.round(Date.now() / 1000);
+		req.body.country = functions.brand['server_siteadmin_country'];
+		req.body.locationName = functions.brand['server_sitename'];
 		fs.appendFileSync('/var/log/connectbox/connectbox_enhanced.json',JSON.stringify(req.body.value) + '\n');
 		res.sendStatus(200);
  	}

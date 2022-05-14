@@ -8,6 +8,8 @@ const
     Logger = require('./logger.js'),
     logger = new Logger(configs.logging);
 
+var brand = JSON.parse(fs.readFileSync('/usr/local/connectbox/brand.txt'));
+
 var get = {};
 var set = {};
 var doCommand = {};
@@ -392,7 +394,7 @@ function getBrand(key) {
 
 //DICT:SET:brand (key=value): Set value in brand.txt where value is like Image=connectbox_logo.png
 function setBrand(body) {
-	var brand = JSON.parse(fs.readFileSync('/usr/local/connectbox/brand.txt'));
+	brand = JSON.parse(fs.readFileSync('/usr/local/connectbox/brand.txt'));
 	var key = body.value.split('=')[0];
 	var val = body.value.split('=')[1];
 	try {
@@ -605,6 +607,7 @@ function topKFrequent(arrayOfStrings, k) {
 }
 module.exports = {
 	auth,
+	brand,
 	get,
 	set,
 	doCommand,
