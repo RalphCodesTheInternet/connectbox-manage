@@ -48,6 +48,7 @@ app.get('/admin/api/logout', function(req,res) {
 })
 
 app.put('/admin/api/weblog', function(req,res) {
+	logger.log('debug', `${req.method} ${req.originalUrl}: ${req.body.mediaIdentifier}`);
 	try {
 		req.body.value.timestamp = Math.round(Date.now() / 1000);
 		req.body.country = functions.brand['server_siteadmin_country'];
