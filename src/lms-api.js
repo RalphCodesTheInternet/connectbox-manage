@@ -82,6 +82,38 @@ lms.get_course_roster = async (id)  =>  {
   return response.data;
 };
 /**
+ * Enroll the user from the course. Always enrolls as a student.
+ *
+ * @param  {integer}  courseid  The course id
+ * @param  {integer}  userid    The user id
+ * @return {Promise}  The response
+ */
+lms.enroll_course_roster_user = async (courseid, userid)  =>  {
+  if (!lms.can_make_request()) {
+    return 'You need to set the url and token!';
+  }
+  if (!courseid) {
+    return 'You must supply a vaild course id!';
+  }
+  if (!userid) {
+    return 'You must supply a vaild user id!';
+  }
+
+  const params = {
+    'wstoken': lms.token,
+    'wsfunction': 'enrol_manual_enrol_users',
+    'moodlewsrestformat': 'json',
+    'enrolments[0][courseid]': courseid,
+    'enrolments[0][userid]': userid,
+    'enrolments[0][roleid]': 5,
+  };
+  const response = await axios.post(lms.url, null, {params: params});
+  if (!response.data) {
+    return 'The user has been enrolled in the course.';
+  }
+  return response.data;
+};
+/**
  * Unenroll the user from the course.
  *
  * @param  {integer}  courseid  The course id

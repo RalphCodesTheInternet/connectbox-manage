@@ -489,6 +489,10 @@ get.lms_courses = function (id) {
 get.lms_courses_roster = function (id) {
   return lms.get_course_roster(id).then((response) =>  response);
 }
+//DICT:PUT:lms_enroll_user (course_id, user_id): Enroll a user into a course as a student.
+put.lms_enroll_user = function (courseid, userid) {
+  return lms.enroll_course_roster_user(courseid, userid).then((response) =>  response);
+}
 //DICT:DEL:lms_unenroll_user (course_id, user_id): Unenroll a user from a course.
 del.lms_unenroll_user = function (courseid, userid) {
   return lms.unenroll_course_roster_user(courseid, userid).then((response) =>  response);
