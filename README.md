@@ -59,6 +59,8 @@ Log into Moodle with an administration account.  First, we need to create a cust
         - core_course_get_courses_by_field
         - core_course_get_courses
         - core_enrol_get_enrolled_users
+        - enrol_manual_enrol_users
+        - enrol_manual_unenrol_users
     - Click Add functions
 
 Now we need to generate the token.
