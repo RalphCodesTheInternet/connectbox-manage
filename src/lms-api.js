@@ -59,6 +59,32 @@ lms.get_course = async (id) =>  {
   return response.data;
 }
 /**
+ * Delete the requested course
+ *
+ * @param  {integer}  id  The id of the course
+ * @return {Promise}      The JSON response
+ */
+lms.delete_course = async (id)  => {
+  if (!lms.can_make_request()) {
+    return 'You need to set the url and token!';
+  }
+  if (!id) {
+    return 'You must supply a vaild id!';
+  }
+
+  const params = {
+    'wstoken': lms.token,
+    'wsfunction': 'core_course_delete_courses',
+    'moodlewsrestformat': 'json',
+    'courseids[0]': id,
+  };
+  const response = await axios.post(lms.url, null, {params: params});
+  if (response.data.warnings.length == 0) {
+    return 'The course has been deleted.';
+  }
+  return response.data;
+}
+/**
  * Get a list of students enrolled in a class
  *
  * @param  {integer}  id  The id for the course
