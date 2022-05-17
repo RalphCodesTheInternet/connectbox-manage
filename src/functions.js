@@ -296,7 +296,9 @@ set.subscribe = function(json) {
 
 //DICT:SET:openwelldownload (URL): Download the file and install into OpenWell 
 set.openwelldownload = function(json) {
-	exec(`sudo /usr/bin/python /usr/local/connectbox/bin/lazyLoader.py ${json.value} >/tmp/loadContent.log 2>&1`);
+	set.subscribe({});  // Zero out the subscription
+	execute('sudo rm /tmp/loadContent.log >/dev/null 2>&1');
+	exec(`sudo /usr/local/connectbox/bin/lazyLoader.py ${json.value} & >/tmp/loadContent.log 2>&1 &`);
 	return ('Downloading content has begun.');
 }
 
@@ -304,7 +306,8 @@ set.openwelldownload = function(json) {
 doCommand.openwellrefresh = function() {
 	var processes = execute(`pgrep -af 'lazyLoader.py'`);
 	if (!processes.includes('python')) {
-		exec(`sudo /usr/bin/python /usr/local/connectbox/bin/lazyLoader.py >/tmp/loadContent.log 2>&1`);
+		execute('sudo rm /tmp/loadContent.log >/dev/null 2>&1');
+		exec(`sudo /usr/local/connectbox/bin/lazyLoader.py >/tmp/loadContent.log 2>&1 &`);
 		return ('Downloading content has begun.');
 	}
 	else {
