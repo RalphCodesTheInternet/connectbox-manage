@@ -494,34 +494,42 @@ get.weblog = function (json){
 	var logString = execute("cat /var/log/connectbox/connectbox_enhanced* |grep mediaIdentifier");
 	var logArray = logString.split('\n');
 	var response = [];
+	var logs = [];
+	// Load the rows, parse in JSON
 	for (var log of logArray) {
 		try {
 			log = JSON.parse(log);
-			if (!log.sync && log.timestamp) {
-				response.push(log);
-			}
+			logs.push(log);
 		}
 		catch (err) {
 			continue;
 		}
 	}
-	return (response);
+	logs.sort(sortArrayByTimestamp);  // Custom sort based on timestamp of the log rows so that no matter the order of the files, we get an ordered array
+	return (logs);
 }
 //DICT:GET:syncweblog: Get Content Viewing Logs since last get
 get.syncweblog = function (json){
 	var logString = execute("cat /var/log/connectbox/connectbox_enhanced*");
 	var logArray = logString.split('\n');
 	var response = [];
+	var logs = [];
+	// Load the rows, parse in JSON
 	for (var log of logArray) {
 		try {
 			log = JSON.parse(log);
-			response.push(log);
-			if (log.sync) {
-				response = [];
-			}
+			logs.push(log);
 		}
 		catch (err) {
 			continue;
+		}
+	}
+	logs.sort(sortArrayByTimestamp);  // Custom sort based on timestamp of the log rows so that no matter the order of the files, we get an ordered array
+	for (var log of logs) {
+		response.push(log);
+		// Whenever we see a sync log that means everything in the array has already been sent.  So clear the array and continue.
+		if (log.sync) {
+			response = [];
 		}
 	}
 	if (response.length > 0) {
@@ -611,6 +619,17 @@ function topKFrequent(arrayOfStrings, k) {
     }
     return response;
 }
+
+function sortArrayByTimestamp( a, b ) {
+  if ( a.timestamp < b.timestamp ){
+    return -1;
+  }
+  if ( a.timestamp > b.timestamp ){
+    return 1;
+  }
+  return 0;
+}
+
 module.exports = {
 	auth,
 	brand,
