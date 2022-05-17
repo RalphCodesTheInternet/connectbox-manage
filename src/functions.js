@@ -509,7 +509,7 @@ get.weblog = function (json){
 }
 //DICT:GET:syncweblog: Get Content Viewing Logs since last get
 get.syncweblog = function (json){
-	var logString = execute("cat /var/log/connectbox/connectbox_enhanced* |grep mediaIdentifier");
+	var logString = execute("cat /var/log/connectbox/connectbox_enhanced*");
 	var logArray = logString.split('\n');
 	var response = [];
 	for (var log of logArray) {
