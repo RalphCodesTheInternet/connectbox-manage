@@ -13,6 +13,7 @@ args.shift(); // Remove path to script
 var command = args[0];
 var key = args[1];
 var value = args[2];
+var secondValue = args[3];
 
 if (!command || command.toLowerCase() == 'help') {
 	console.log(usage.text);
@@ -25,6 +26,69 @@ else {
 			}
 			else if (key.toLowerCase() === 'logs') {
 				console.log(functions.getLogs(value));
+			}
+			else if (key.toLowerCase().startsWith('lms_')) {
+				const callback = async ()	=>	{
+					let res;
+					if (secondValue) {
+						res = await functions.get[key](value, secondValue);
+					} else {
+						res = await functions.get[key](value);
+					}
+					console.dir(res, { depth:null });
+				};
+				callback();
+			}
+			else {
+				console.log(functions.get[key]());
+			}
+		break;
+		case 'del':
+			if (key.toLowerCase().startsWith('lms_')) {
+				const callback = async ()	=>	{
+					let res;
+					if (secondValue) {
+						res = await functions.del[key](value, secondValue);
+					} else {
+						res = await functions.del[key](value);
+					}
+					console.dir(res, { depth:null });
+				};
+				callback();
+			}
+			else {
+				console.log(functions.del[key]());
+			}
+		break;
+		case 'post':
+			if (key.toLowerCase().startsWith('lms_')) {
+				const callback = async ()	=>	{
+					let res;
+					if (secondValue) {
+						res = await functions.post[key](value, secondValue);
+					} else {
+						res = await functions.post[key](value);
+					}
+					console.dir(res, { depth:null });
+				};
+				callback();
+			}
+			else {
+				console.log(functions.post[key]());
+			}
+		break;
+		case 'put':
+			if (key.toLowerCase().startsWith('lms_')) {
+				const callback = async ()	=>	{
+					let res;
+					if (secondValue) {
+						res = await functions.put[key](value, secondValue);
+					} else {
+						res = await functions.put[key](value);
+					}
+					console.dir(res, { depth:null });
+				};
+				callback();
 			}
 			else {
 				var response = functions.get[key]();
@@ -43,11 +107,11 @@ else {
 				console.log(functions.setBrand(payload));
 			}
 			else {
-				console.log(functions.set[key]({value:value}));		
+				console.log(functions.set[key]({value:value}));
 			}
 		break;
 		case 'do':
-				console.log(functions.doCommand[key]({value:value}));		
+				console.log(functions.doCommand[key]({value:value}));
 		break;
 	}
 }
