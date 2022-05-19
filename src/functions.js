@@ -3,10 +3,13 @@ const
 	{execSync}= require("child_process"),
 	{ exec } = require('child_process'),
 	fs = require('fs'),
+	moment = require('moment'),
   lms = require('./lms-api'),
 	request = require('request'),
   Logger = require('./logger.js'),
   logger = new Logger(configs.logging);
+
+var brand = JSON.parse(fs.readFileSync('/usr/local/connectbox/brand.txt'));
 
 var get = {};
 var post = {};
@@ -40,6 +43,11 @@ set.password = function (json){
 	var hash = execute(`echo ${json.value} | openssl passwd -apr1 -salt CBOX2018 -stdin`)
 	fs.writeFileSync('/usr/local/connectbox/etc/basicauth',`admin:${hash.toString()}`);
 	return (true);
+}
+
+//DICT:GET:boxid: Get the boxid (MAC address) of box
+get.boxid = function (){
+	return (execute(`cat /sys/class/net/eth0/address`).replace(/:/g,'-').replace('\n',''));
 }
 
 //DICT:GET:apssid: Access Point SSID
@@ -276,7 +284,7 @@ get.package = function() {
 }
 //DICT:GET:packagestatus: Returns the current number of missing items in openwell content package
 get.packagestatus = function() {
-	return(execute(`grep 'Failed Item Count' /tmp/loadContent.log | cut -d":" -f2`));
+	return(execute(`grep 'Failed Item Count' /tmp/loadContent.log 2>/dev/null | cut -d":" -f2`) || 'Package Info Unavailable');
 }
 
 //DICT:GET:subscribe: Returns the current openwell content subscription
@@ -300,7 +308,9 @@ set.subscribe = function(json) {
 
 //DICT:SET:openwelldownload (URL): Download the file and install into OpenWell
 set.openwelldownload = function(json) {
-	exec(`sudo /usr/bin/python /usr/local/connectbox/bin/lazyLoader.py ${json.value} >/tmp/loadContent.log 2>&1`);
+	set.subscribe({});  // Zero out the subscription
+	execute('sudo rm /tmp/loadContent.log >/dev/null 2>&1');
+	exec(`sudo /usr/local/connectbox/bin/lazyLoader.py ${json.value} & >/tmp/loadContent.log 2>&1 &`);
 	return ('Downloading content has begun.');
 }
 
@@ -308,7 +318,8 @@ set.openwelldownload = function(json) {
 doCommand.openwellrefresh = function() {
 	var processes = execute(`pgrep -af 'lazyLoader.py'`);
 	if (!processes.includes('python')) {
-		exec(`sudo /usr/bin/python /usr/local/connectbox/bin/lazyLoader.py >/tmp/loadContent.log 2>&1`);
+		execute('sudo rm /tmp/loadContent.log >/dev/null 2>&1');
+		exec(`sudo /usr/local/connectbox/bin/lazyLoader.py >/tmp/loadContent.log 2>&1 &`);
 		return ('Downloading content has begun.');
 	}
 	else {
@@ -403,7 +414,7 @@ function getBrand(key) {
 
 //DICT:SET:brand (key=value): Set value in brand.txt where value is like Image=connectbox_logo.png
 function setBrand(body) {
-	var brand = JSON.parse(fs.readFileSync('/usr/local/connectbox/brand.txt'));
+	brand = JSON.parse(fs.readFileSync('/usr/local/connectbox/brand.txt'));
 	var key = body.value.split('=')[0];
 	var val = body.value.split('=')[1];
 	try {
@@ -428,23 +439,133 @@ function setBrand(body) {
 	return(body.value);
 }
 
-//DICT:GET:weblog: Get logs since last get
+//DICT:GET:topten: Get top 10 Content Viewing Logs
+get.topten = function (json){
+	var logString = execute("cat /var/log/connectbox/connectbox_enhanced* |grep mediaIdentifier");
+	var logArray = logString.split('\n');
+	var hits = {hour:[],day:[],week:[],month:[],year:[]};
+	var times = {hour:60*60,day:60*60*24,week: 60*60*24*7, month: 60*60*24*30, year: 60*60*24*365};
+	var now = Math.round(Date.now() / 1000);
+	for (var log of logArray) {
+		try {
+			log = JSON.parse(log);
+			for (var duration of Object.keys(hits)) {
+				if (!log.sync && log.timestamp > now-times[duration]) {
+					hits[duration].push(log.mediaIdentifier);
+				}
+			}
+
+		}
+		catch (err) {
+			continue;
+		}
+	}
+	var response = {hour:topKFrequent(hits["hour"],10),day:topKFrequent(hits["day"],10),week:topKFrequent(hits["week"],10),month:topKFrequent(hits["month"],10),year:topKFrequent(hits["year"],10)};
+	return (response);
+}
+//DICT:GET:stats: Get Detailed Content Viewing Logs By Period
+get.stats = function (json){
+	var logString = execute("cat /var/log/connectbox/connectbox_enhanced* |grep mediaIdentifier");
+	var logArray = logString.split('\n');
+	var hits = {week:{},month:{},year:{}};
+	for (var log of logArray) {
+		try {
+			log = JSON.parse(log);
+			var logDates = {
+				year:moment(log.timestamp*1000).format('YYYY'),
+				month:moment(log.timestamp*1000).format('YYYYMM'),
+				week:moment(log.timestamp*1000).format('YYYY') + 'W' + moment(log.timestamp*1000).isoWeek()
+			};
+			if (!hits.year[logDates.year]) { hits.year[logDates.year] =[] }
+			if (!hits.month[logDates.month]) { hits.month[logDates.month] =[] }
+			if (!hits.week[logDates.week]) { hits.week[logDates.week] =[] }
+			hits.year[logDates.year].push(log.mediaIdentifier)
+			hits.month[logDates.month].push(log.mediaIdentifier)
+			hits.week[logDates.week].push(log.mediaIdentifier)
+		}
+		catch (err) {
+			console.log(log,err)
+			continue;
+		}
+	}
+	//console.log(hits);
+	var response = {week:[],month:[],year:[]};
+	for (var dateType of Object.keys(hits)) {
+		//console.log(`dateType: ${dateType}`);
+		for (var period of Object.keys(hits[dateType])) {
+			//console.log(`	period: ${period}`);
+			var record = {date: period,stats:topKFrequent(hits[dateType][period],1000)}
+			response[dateType].push(record);
+		}
+	}
+	return (response);
+}
+
+//DICT:GET:weblog: Get all Content Viewing Logs
 get.weblog = function (json){
+	var logString = execute("cat /var/log/connectbox/connectbox_enhanced* |grep mediaIdentifier");
+	var logArray = logString.split('\n');
+	var response = [];
+	var logs = [];
+	// Load the rows, parse in JSON
+	for (var log of logArray) {
+		try {
+			log = JSON.parse(log);
+			logs.push(log);
+		}
+		catch (err) {
+			continue;
+		}
+	}
+	logs.sort(sortArrayByTimestamp);  // Custom sort based on timestamp of the log rows so that no matter the order of the files, we get an ordered array
+	return (logs);
+}
+//DICT:GET:syncweblog: Get Content Viewing Logs since last get
+get.syncweblog = function (json){
+	var logString = execute("cat /var/log/connectbox/connectbox_enhanced*");
+	var logArray = logString.split('\n');
+	var response = [];
+	var logs = [];
+	// Load the rows, parse in JSON
+	for (var log of logArray) {
+		try {
+			log = JSON.parse(log);
+			logs.push(log);
+		}
+		catch (err) {
+			continue;
+		}
+	}
+	logs.sort(sortArrayByTimestamp);  // Custom sort based on timestamp of the log rows so that no matter the order of the files, we get an ordered array
+	for (var log of logs) {
+		response.push(log);
+		// Whenever we see a sync log that means everything in the array has already been sent.  So clear the array and continue.
+		if (log.sync) {
+			response = [];
+		}
+	}
+	if (response.length > 0) {
+		fs.appendFileSync('/var/log/connectbox/connectbox_enhanced.json',JSON.stringify({sync:true,timestamp:Math.round(Date.now() / 1000)}) + '\n');
+	}
+	return (response);
+}
+
+//DICT:GET:disable_chat: Get status of disabling chat
+get.disable_chat = function (json){
 	try {
-		var logString = fs.readFileSync('/var/log/connectbox/connectbox_enhanced.log','utf-8');
-		var logArray = logString.split('\n');
-		return (JSON.stringify(logArray));
+		var chat = require('/var/www/enhanced/content/www/assets/content/config.json');
+		return (chat["disable_chat"]);
 	}
 	catch (err) {
-		return(JSON.stringify(['']));
+		return false;
 	}
 }
-//DICT:SET:weblog (json): Send a single web log item
-set.weblog = function (json){
+//DICT:SET:disable_chat (json): 1 is disabled and 0 is enabled
+set.disable_chat = function (json){
 	try {
-		json.value = JSON.parse(json.value);
-		json.value.timestamp = Math.round(Date.now() / 1000);
-		fs.appendFileSync('/var/log/connectbox/connectbox_enhanced.log',JSON.stringify(json.value) + '\n');
+		var chat = require('/var/www/enhanced/content/www/assets/content/config.json');
+		chat["disable_chat"] = boolify(json.value);
+		fs.writeFileSync('/var/www/enhanced/content/www/assets/content/config.json',JSON.stringify(chat));
 		return true;
  	}
  	catch (err) {
@@ -452,21 +573,21 @@ set.weblog = function (json){
  	}
 }
 
-//DICT:GET:disable_openwell_chat: Get status of disabling chat
-get.disable_openwell_chat = function (json){
+//DICT:GET:disable_stats: Get status of disabling stats
+get.disable_stats = function (json){
 	try {
 		var chat = require('/var/www/enhanced/content/www/assets/content/config.json');
-		return (chat["disable_openwell_chat"]);
+		return (chat["disable_stats"]);
 	}
 	catch (err) {
 		return false;
 	}
 }
-//DICT:SET:disable_openwell_chat (json): 1 is disabled and 0 is enabled
-set.disable_openwell_chat = function (json){
+//DICT:SET:disable_stats (json): 1 is disabled and 0 is enabled
+set.disable_stats = function (json){
 	try {
 		var chat = require('/var/www/enhanced/content/www/assets/content/config.json');
-		chat["disable_openwell_chat"] = json.value;
+		chat["disable_stats"] = boolify(json.value);
 		fs.writeFileSync('/var/www/enhanced/content/www/assets/content/config.json',JSON.stringify(chat));
 		return true;
  	}
@@ -545,8 +666,45 @@ function execute(command) {
 	}
 }
 
+function boolify(value) {
+	if (value == "1" || value === 1 || (typeof value === 'string' && value.toLowerCase() === 'true')) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
+}
+
+function topKFrequent(arrayOfStrings, k) {
+	// Takes in arrayOfStrings (titles of content) and returns top k most frequent items in the list
+    let hash = {}
+    for (let key of arrayOfStrings) {
+        if (!hash[key]) hash[key] = 0
+        hash[key]+= 1 || 1;
+    }
+    const hashToArray = Object.entries(hash)
+    const sortedArray = hashToArray.sort((a,b) => b[1] - a[1])
+    const sortedElements = sortedArray.map(val => val[0])
+    var response = [];
+    for (var data of sortedArray.slice(0, k)) {
+    	response.push({resource:data[0],count:data[1]})
+    }
+    return response;
+}
+
+function sortArrayByTimestamp( a, b ) {
+  if ( a.timestamp < b.timestamp ){
+    return -1;
+  }
+  if ( a.timestamp > b.timestamp ){
+    return 1;
+  }
+  return 0;
+}
+
 module.exports = {
 	auth,
+	brand,
 	get,
   post,
   put,

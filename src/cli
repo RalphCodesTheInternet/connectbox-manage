@@ -91,7 +91,13 @@ else {
 				callback();
 			}
 			else {
-				console.log(functions.put[key]());
+				var response = functions.get[key]();
+				if (typeof response === 'object') {
+					console.log(JSON.stringify(response))
+				}
+				else {
+					console.log(response);
+				}
 			}
 		break;
 		case 'set':

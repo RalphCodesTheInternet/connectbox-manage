@@ -9,10 +9,12 @@ const express = require('express'),
    	{execSync}= require("child_process"),
 	moment = require('moment-timezone'),
     configs = require('./configs.js'),
+	functions = require('./functions.js');
     Logger = require('./logger.js'),
     logger = new Logger(configs.logging);
 
 var chats = {};
+var boxid = functions.get['hostname'];
 
 console.log(`Listening on port ${configs.port}`);
 app.listen(configs.port);
@@ -44,6 +46,23 @@ app.get('/admin/api/logout', function(req,res) {
 	req.session = null;
 	res.sendStatus(200);
 })
+
+app.put('/admin/api/weblog', function(req,res) {
+	logger.log('debug', `${req.method} ${req.originalUrl}: ${req.body.value.mediaIdentifier}`);
+	try {
+		req.body.value.timestamp = Math.round(Date.now() / 1000);
+		req.body.value.country = functions.brand['server_siteadmin_country'];
+		req.body.value.locationName = functions.brand['server_sitename'];
+		req.body.value.deviceProvider = 'connectbox';
+		req.body.value.deviceIdentifier = boxid;
+		fs.appendFileSync('/var/log/connectbox/connectbox_enhanced.json',JSON.stringify(req.body.value) + '\n');
+		res.sendStatus(200);
+ 	}
+ 	catch (err) {
+ 		console.log(err);
+ 		res.sendStatus(500);
+ 	}
+});
 
 app.get(['/chat','/chat/:lastMessage'], function(req,res) {
 	// Check for lastMessage value, otherwise, get all non expired messages
