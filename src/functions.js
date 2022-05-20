@@ -25,14 +25,6 @@ var logSources = {
 	"loadContent": 'cat /tmp/loadContent.log',
 	"sync": 'cat /tmp/push_messages.log'
 }
-/**
- * The url to the LMS
- */
-lms.url = 'http://learn.dev-staging.thewellcloud.cloud/webservice/rest/server.php';
-/**
- * The web access token from the LMS
- */
-lms.token = '45827d91215f7cbc962971ee7047e4a6';
 
 function auth (password) {
 	console.log(auth);
