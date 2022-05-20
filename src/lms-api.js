@@ -1,4 +1,6 @@
 const axios = require('axios').default;
+const fs = require('fs');
+var brand = JSON.parse(fs.readFileSync('/usr/local/connectbox/brand.txt'));
 /**
  * Our LMS object that handles interaction with the LMS.  This script currently supports
  * Moodle's API.
@@ -6,8 +8,8 @@ const axios = require('axios').default;
  * @type {Object}
  */
 const lms = {};
-lms.url = '';
-lms.token = '';
+lms.url = `http://${brand.Brand}/webservice/rest/server.php`;
+lms.token = brand.lmstoken;
 /**
  * Do we have everything to make a request?
  *
