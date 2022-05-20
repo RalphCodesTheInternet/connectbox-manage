@@ -1,6 +1,6 @@
 const axios = require('axios').default;
 const fs = require('fs');
-var brand = JSON.parse(fs.readFileSync('/usr/local/connectbox/brand.txt'));
+const brand = JSON.parse(fs.readFileSync('/usr/local/connectbox/brand.txt'));
 /**
  * Our LMS object that handles interaction with the LMS.  This script currently supports
  * Moodle's API.
