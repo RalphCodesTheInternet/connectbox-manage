@@ -51,7 +51,7 @@ app.put('/admin/api/weblog', function(req,res) {
 	logger.log('debug', `${req.method} ${req.originalUrl}: ${req.body.value.mediaIdentifier}`);
 	try {
 		req.body.value.timestamp = Math.round(Date.now() / 1000);
-		req.body.value.country = functions.brand['server_siteadmin_country'];
+		req.body.value.country = functions.brand['server_siteadmin_country'].toLowerCase();
 		req.body.value.locationName = functions.brand['server_sitename'];
 		req.body.value.deviceProvider = 'connectbox';
 		req.body.value.deviceIdentifier = boxid;
