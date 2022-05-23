@@ -302,7 +302,7 @@ set.subscribe = function(json) {
 set.openwelldownload = function(json) {
 	set.subscribe({});  // Zero out the subscription
 	execute('sudo rm /tmp/loadContent.log >/dev/null 2>&1');
-	exec(`sudo /usr/local/connectbox/bin/lazyLoader.py ${json.value} & >/tmp/loadContent.log 2>&1 &`);
+	exec(`sudo /usr/local/connectbox/bin/lazyLoader.py ${json.value} >/tmp/loadContent.log 2>&1 &`);
 	return ('Downloading content has begun.');
 }
 
