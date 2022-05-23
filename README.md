@@ -42,6 +42,10 @@ get.clientssid = function (){
 
 # Create A Moodle API Token
 
+The connectbox repo default Moodle database has these defaults and creates a token at build time.  The token is stored in the database and /usr/local/connectbox/brand.txt
+
+This is the process for performing this manually:
+
 Log into Moodle with an administration account.  First, we need to create a custom API service:
 
 - Visit Site administration > Plugins > Web services > External services
