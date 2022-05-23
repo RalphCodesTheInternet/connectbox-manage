@@ -8,7 +8,7 @@ const brand = JSON.parse(fs.readFileSync('/usr/local/connectbox/brand.txt'));
  * @type {Object}
  */
 const lms = {};
-lms.url = `http://${brand.Brand}/webservice/rest/server.php`;
+lms.url = `http://learn.${brand.Brand}/webservice/rest/server.php`;
 lms.token = brand.lmstoken;
 /**
  * Do we have everything to make a request?
