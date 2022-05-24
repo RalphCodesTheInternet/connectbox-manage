@@ -230,15 +230,15 @@ doCommand.sync = function() {
 
 //DICT:DO:shutdown: Halt system
 doCommand.shutdown = function() {
-	return(execute(`sudo shutdown -h now &`))
+  setTimeout(() => execute(`sudo shutdown -h now &`), 1000);
+	return(true)
 }
 
 //DICT:DO:reboot: Reboot
 doCommand.reboot = function() {
-	return(execute(`sudo shutdown -r now &`))
+  setTimeout(() => execute(`sudo shutdown -r now &`), 1000);
+ 	return(true);
 }
-
-
 
 //DICT:GET:subscriptions: Returns a list of subscriptions available on the server
 get.subscriptions = function() {
