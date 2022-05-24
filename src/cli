@@ -14,6 +14,7 @@ var command = args[0];
 var key = args[1];
 var value = args[2];
 var secondValue = args[3];
+var thirdValue = args[4];
 
 if (!command || command.toLowerCase() == 'help') {
 	console.log(usage.text);
@@ -30,7 +31,9 @@ else {
 			else if (key.toLowerCase().startsWith('lms_')) {
 				const callback = async ()	=>	{
 					let res;
-					if (secondValue) {
+					if (thirdValue) {
+						res = await functions.get[key](value, secondValue, thirdValue);
+					} else if (secondValue) {
 						res = await functions.get[key](value, secondValue);
 					} else {
 						res = await functions.get[key](value);
@@ -47,7 +50,9 @@ else {
 			if (key.toLowerCase().startsWith('lms_')) {
 				const callback = async ()	=>	{
 					let res;
-					if (secondValue) {
+					if (thirdValue) {
+						res = await functions.del[key](value, secondValue, thirdValue);
+					} else if (secondValue) {
 						res = await functions.del[key](value, secondValue);
 					} else {
 						res = await functions.del[key](value);
@@ -64,7 +69,9 @@ else {
 			if (key.toLowerCase().startsWith('lms_')) {
 				const callback = async ()	=>	{
 					let res;
-					if (secondValue) {
+					if (thirdValue) {
+						res = await functions.post[key](value, secondValue, thirdValue);
+					} else if (secondValue) {
 						res = await functions.post[key](value, secondValue);
 					} else {
 						res = await functions.post[key](value);
@@ -81,7 +88,9 @@ else {
 			if (key.toLowerCase().startsWith('lms_')) {
 				const callback = async ()	=>	{
 					let res;
-					if (secondValue) {
+					if (thirdValue) {
+						res = await functions.put[key](value, secondValue, thirdValue);
+					} else if (secondValue) {
 						res = await functions.put[key](value, secondValue);
 					} else {
 						res = await functions.put[key](value);

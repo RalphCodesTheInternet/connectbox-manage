@@ -40,7 +40,7 @@ router.get('/lms/courses/:id(\\d+)/users', async function get(req, res) {
   res.send(data);
 });
 router.put('/lms/courses/:id(\\d+)/users/:userid(\\d+)', async function enroll(req, res) {
-  const result = await functions.put['lms_enroll_user'](req.params.id, req.params.userid);
+  const result = await functions.put['lms_enroll_user'](req.params.id, req.params.userid, req.body);
   const data = {code:0,result: result};
   res.send(data);
 });
