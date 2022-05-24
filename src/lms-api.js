@@ -10,6 +10,7 @@ const brand = JSON.parse(fs.readFileSync('/usr/local/connectbox/brand.txt'));
 const lms = {};
 lms.url = `http://learn.${brand.Brand}/webservice/rest/server.php`;
 lms.token = brand.lmstoken;
+
 /**
  * Do we have everything to make a request?
  *
@@ -110,13 +111,17 @@ lms.get_course_roster = async (id)  =>  {
   return response.data;
 };
 /**
- * Enroll the user from the course. Always enrolls as a student.
+ * Enroll the user from the course. By default enrolls as a student.  Supply a roleid in
+ * the data to change the role.
  *
  * @param  {integer}  courseid  The course id
  * @param  {integer}  userid    The user id
+ * @param  {object}   data      The JSON data that stores a roleid if it exists.
+ *
  * @return {Promise}  The response
  */
-lms.enroll_course_roster_user = async (courseid, userid)  =>  {
+lms.enroll_course_roster_user = async (courseid, userid, data)  =>  {
+  let roleid = 5;
   if (!lms.can_make_request()) {
     return 'You need to set the url and token!';
   }
@@ -126,6 +131,9 @@ lms.enroll_course_roster_user = async (courseid, userid)  =>  {
   if (!userid) {
     return 'You must supply a vaild user id!';
   }
+  if ((data)  && ('roleid' in data) && ([1, 3, 4, 5].includes(parseInt(data.roleid, 10)))) {
+    roleid = parseInt(data.roleid, 10);
+  }
 
   const params = {
     'wstoken': lms.token,
@@ -133,7 +141,7 @@ lms.enroll_course_roster_user = async (courseid, userid)  =>  {
     'moodlewsrestformat': 'json',
     'enrolments[0][courseid]': courseid,
     'enrolments[0][userid]': userid,
-    'enrolments[0][roleid]': 5,
+    'enrolments[0][roleid]': roleid,
   };
   const response = await axios.post(lms.url, null, {params: params});
   if (!response.data) {
