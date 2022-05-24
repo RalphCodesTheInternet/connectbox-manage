@@ -602,6 +602,19 @@ get.lms_courses = function (id) {
 del.lms_courses = function (id) {
   return lms.delete_course(id).then((response) =>  response);
 }
+//DICT:PUT:lms_courses (json): Update an existing course for the LMS. JSON must have an id set.
+put.lms_courses = function (json) {
+  let data = json;
+  try {
+    data = JSON.parse(json);
+  } catch (e) {
+  }
+  if (!('id' in data)) {
+    return 'You must provide a valid id!';
+  }
+  const id = data.id;
+  return lms.put_course(id, data).then((response) =>  response);
+}
 //DICT:GET:lms_courses_roster (course_id): Get a list of users in the given course.
 get.lms_courses_roster = function (id) {
   return lms.get_course_roster(id).then((response) =>  response);
