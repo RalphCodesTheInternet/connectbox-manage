@@ -58,6 +58,7 @@ Log into Moodle with an administration account.  First, we need to create a cust
         - core_user_update_users
         - core_course_get_courses_by_field
         - core_course_get_courses
+        - core_course_update_courses
         - core_course_delete_courses
         - core_enrol_get_enrolled_users
         - enrol_manual_enrol_users

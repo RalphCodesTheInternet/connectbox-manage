@@ -60,7 +60,7 @@ lms.get_course = async (id) =>  {
   };
   const response = await axios.post(lms.url, null, {params: params});
   return response.data;
-}
+};
 /**
  * Delete the requested course
  *
@@ -86,7 +86,40 @@ lms.delete_course = async (id)  => {
     return 'The course has been deleted.';
   }
   return response.data;
-}
+};
+/**
+ * Update the given course
+ *
+ * @param  {integer}    id      The id of the course to update
+ * @param  {object}     data    The data with update info
+ * @return {Promise}            The JSON response
+ */
+lms.put_course = async (id, data) => {
+  const whitelist = [
+    'fullname', 'shortname', 'categoryid', 'summary', 'summaryformat', 'format',
+    'showgrades', 'newsitems', 'startdate', 'enddate', 'maxbytes', 'showreports',
+    'visible', 'groupmode', 'groupmodeforce', 'defaultgroupingid', 'enablecompletion',
+    'completionnotify', 'lang', 'forcetheme'
+  ];
+  if (!lms.can_make_request()) {
+     return 'You need to set the url and token!';
+   }
+   if (!id) {
+     return 'You must provide a valid id.';
+   }
+   const params = {
+     'wstoken': lms.token,
+     'wsfunction': 'core_course_update_courses',
+     'moodlewsrestformat': 'json',
+     'courses[0][id]': id,
+   };
+   whitelist.filter((field) => (field in data)).forEach((field) => params['courses[0]['+field+']'] = data[field]);
+   const response = await axios.post(lms.url, null, {params: params});
+   if (response.data.warnings.length == 0) {
+     return 'The course has been updated.';
+   }
+   return response.data;
+};
 /**
  * Get a list of students enrolled in a class
  *
@@ -222,7 +255,7 @@ lms.get_user = async (id) =>  {
   };
   const response = await axios.post(lms.url, null, {params: params});
   return response.data;
-}
+};
 /**
  * Create a new user in the LMS
  *
