@@ -1,6 +1,7 @@
 const axios = require('axios').default;
 const fs = require('fs');
 const brand = JSON.parse(fs.readFileSync('/usr/local/connectbox/brand.txt'));
+const {execSync} = require("child_process");
 /**
  * Our LMS object that handles interaction with the LMS.  This script currently supports
  * Moodle's API.
@@ -9,7 +10,7 @@ const brand = JSON.parse(fs.readFileSync('/usr/local/connectbox/brand.txt'));
  */
 const lms = {};
 lms.url = `http://learn.${brand.Brand}/webservice/rest/server.php`;
-lms.token = brand.lmstoken;
+lms.token = execSync("sudo -u postgres psql moodle -qtAX -c 'select token from mdl_external_tokens where externalserviceid = 2;'").toString().replace('\n','');
 
 /**
  * Do we have everything to make a request?
