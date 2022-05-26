@@ -458,9 +458,9 @@ get.topten = function (json){
 //DICT:GET:stats: Get Detailed Content Viewing Logs By Period
 get.stats = function (json){
 	var logString = execute("cat /var/log/connectbox/connectbox_enhanced* |grep mediaIdentifier");
-	if (logString.includes('Error: Command failed:')) { return ([]) }
-	var logArray = logString.split('\n');
 	var hits = {week:{},month:{},year:{}};
+	if (logString.includes('Error: Command failed:')) { return (hits) }
+	var logArray = logString.split('\n');
 	for (var log of logArray) {
 		try {
 			log = JSON.parse(log);
