@@ -10,8 +10,17 @@ const {execSync} = require("child_process");
  */
 const lms = {};
 lms.url = `http://learn.${brand.Brand}/webservice/rest/server.php`;
-lms.token = execSync("sudo -u postgres psql moodle -qtAX -c 'select token from mdl_external_tokens where externalserviceid = 2;'").toString().replace('\n','');
-
+try {
+	if (fs.existsSync('/var/www/moodle')) {
+		lms.token = execSync("sudo -u postgres psql moodle -qtAX -c 'select token from mdl_external_tokens where externalserviceid = 2;'").toString().replace('\n','');
+	}
+	else {
+		lms.token='';	
+	}
+}
+catch (err) {
+	lms.token='';
+}
 /**
  * Do we have everything to make a request?
  *
