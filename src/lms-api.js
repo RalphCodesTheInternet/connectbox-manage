@@ -15,7 +15,7 @@ try {
 		lms.token = execSync("sudo -u postgres psql moodle -qtAX -c 'select token from mdl_external_tokens where externalserviceid = 2;'").toString().replace('\n','');
 	}
 	else {
-		lms.token='';	
+		lms.token='';
 	}
 }
 catch (err) {
@@ -45,7 +45,8 @@ lms.get_courses = async () => {
     'moodlewsrestformat': 'json'
   };
   const response = await axios.post(lms.url, null, {params: params});
-  return response.data;
+  // Remove the initial course that is all of Moodle's users
+  return response.data.filter((course) => course.id !== 1);
 };
 /**
  * Get a specific course
