@@ -35,12 +35,12 @@ verbs = {
 }
 
 # Convert CLI parameters into variables
-paramters = ['executable','command','key','value']
+parameters = ['executable','command','key','value']
 params = {}
 paramCounter = -1
 data = {}
 for i in range(len(sys.argv)):
-	params[paramters[i]] = sys.argv[i]
+	params[parameters[i]] = sys.argv[i]
 #print (params)
 
 # Validate the CLI parameters
