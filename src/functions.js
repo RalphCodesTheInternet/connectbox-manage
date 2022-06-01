@@ -268,11 +268,11 @@ get.subscriptions = function() {
  	}
 }
 //DICT:GET:package: Returns the current openwell content package name
-get.package = function() {
+get.package = async function() {
 	try {
-		var languages = require("/var/www/enhanced/content/www/assets/content/languages.json");
+		var languages = await loadJSONData("/var/www/enhanced/content/www/assets/content/languages.json");
 		var language = languages[0].codes[0].substring(0,2).toLowerCase();
-		var main = require(`/var/www/enhanced/content/www/assets/content/${language}/data/main.json`);
+		var main = await loadJSONData(`/var/www/enhanced/content/www/assets/content/${language}/data/main.json`);
 		return(main.itemName);
 	}
 	catch (err){
@@ -285,9 +285,9 @@ get.packagestatus = function() {
 }
 
 //DICT:GET:subscribe: Returns the current openwell content subscription
-get.subscribe = function() {
+get.subscribe = async function() {
 	try {
-		var subscribe = require("/var/www/enhanced/content/www/assets/content/subscription.json");
+		var subscribe = await loadJSONData("/var/www/enhanced/content/www/assets/content/subscription.json");
 		return(decodeURI(subscribe.packagesAPIFeed.split('packageName=')[1]));
 	}
 	catch (err){
@@ -549,9 +549,9 @@ get.syncweblog = function (json){
 }
 
 //DICT:GET:disable_chat: Get status of disabling chat
-get.disable_chat = function (json){
+get.disable_chat = async function (json){
 	try {
-		var chat = require('/var/www/enhanced/content/www/assets/content/config.json');
+		var chat = await loadJSONData('/var/www/enhanced/content/www/assets/content/config.json');
 		return (chat["disable_chat"]);
 	}
 	catch (err) {
@@ -559,9 +559,9 @@ get.disable_chat = function (json){
 	}
 }
 //DICT:SET:disable_chat (json): 1 is disabled and 0 is enabled
-set.disable_chat = function (json){
+set.disable_chat = async function (json){
 	try {
-		var chat = require('/var/www/enhanced/content/www/assets/content/config.json');
+		var chat = await loadJSONData('/var/www/enhanced/content/www/assets/content/config.json');
 		chat["disable_chat"] = boolify(json.value);
 		fs.writeFileSync('/var/www/enhanced/content/www/assets/content/config.json',JSON.stringify(chat));
 		return true;
@@ -572,9 +572,9 @@ set.disable_chat = function (json){
 }
 
 //DICT:GET:disable_stats: Get status of disabling stats
-get.disable_stats = function (json){
+get.disable_stats = async function (json){
 	try {
-		var chat = require('/var/www/enhanced/content/www/assets/content/config.json');
+		var chat = await loadJSONData('/var/www/enhanced/content/www/assets/content/config.json');
 		return (chat["disable_stats"]);
 	}
 	catch (err) {
@@ -582,9 +582,9 @@ get.disable_stats = function (json){
 	}
 }
 //DICT:SET:disable_stats (json): 1 is disabled and 0 is enabled
-set.disable_stats = function (json){
+set.disable_stats = async function (json){
 	try {
-		var chat = require('/var/www/enhanced/content/www/assets/content/config.json');
+		var chat = await loadJSONData('/var/www/enhanced/content/www/assets/content/config.json');
 		chat["disable_stats"] = boolify(json.value);
 		fs.writeFileSync('/var/www/enhanced/content/www/assets/content/config.json',JSON.stringify(chat));
 		return true;
@@ -670,6 +670,11 @@ put.lms_users = function (json) {
 //NODICT:DEL:lms_users (id): Delete a user from the LMS
 del.lms_users = function (id) {
   return lms.delete_user(id).then((response) =>  response);
+}
+
+async function loadJSONData(filepath) {
+	var data = fs.readFileSync(filepath,'utf-8');
+	return (JSON.parse(data));
 }
 
 function execute(command) {
