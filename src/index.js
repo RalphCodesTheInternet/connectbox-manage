@@ -106,7 +106,11 @@ app.put('/chat', function (req,res) {
 })
 
 app.use(async function (req, res, next) {
-	if (!req.session.username) {
+	if (req.socket.remoteAddress === '::ffff:127.0.0.1' && req.headers.authorization && req.headers.authorization === 'Bearer 9bfa3ed8-8609-4e78-af68-7013aa2b720a') {
+		// CLI is authorized
+		next();
+	}
+	else if (!req.session.username) {
 		res.sendStatus(401);
 	}
 	else {
