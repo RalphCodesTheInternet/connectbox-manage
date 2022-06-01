@@ -31,7 +31,7 @@ usageTexts.do
 verbs = {
 	"get":"GET",
 	"set":"PUT",
-	"do":"PUT"
+	"do":"GET"
 }
 
 # Convert CLI parameters into variables
@@ -72,6 +72,10 @@ if (valid < 0):
 # Assemble the data if it's a set
 if (params['command'] == "set"):
 	data = {"value":params['value']}
+
+# Do commands need to prepend the command to the URL:
+if (params['command'] == "do"):
+	params['key'] = "do/" + params['key']
 
 # Construct the HTTP transaction
 headers = headers = {"Authorization": "Bearer 9bfa3ed8-8609-4e78-af68-7013aa2b720a","Accept":"application/json;charset=UTF-8"}
