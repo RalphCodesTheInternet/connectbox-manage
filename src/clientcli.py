@@ -76,6 +76,10 @@ if (params['command'] == "set"):
 # Do commands need to prepend the command to the URL:
 if (params['command'] == "do"):
 	params['key'] = "do/" + params['key']
+	
+# Brand needs to prepend the command to the URL:
+if (params['key'] == "brand"):
+	params['key'] = "brand/" + params['key']	
 
 # Construct the HTTP transaction
 headers = headers = {"Authorization": "Bearer 9bfa3ed8-8609-4e78-af68-7013aa2b720a","Accept":"application/json;charset=UTF-8"}
