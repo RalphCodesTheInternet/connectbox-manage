@@ -37,6 +37,11 @@ set.password = function (json){
 	return (true);
 }
 
+//DICT:GET:running: Returns true if daemon is running
+get.running = function (){
+	return ("running");
+}
+
 //DICT:GET:boxid: Get the boxid (MAC address) of box
 get.boxid = function (){
 	return (execute(`cat /sys/class/net/eth0/address`).replace(/:/g,'-').replace('\n',''));
@@ -592,18 +597,18 @@ set.disable_stats = function (json){
 /**
  * Moodle functions
  */
-//DICT:GET:lms_courses (id?): Get a list of courses from the LMS. If id is supplied, get the specific course.
+//NODICT:GET:lms_courses (id?): Get a list of courses from the LMS. If id is supplied, get the specific course.
 get.lms_courses = function (id) {
   if (id) {
     return lms.get_course(id).then((response) =>  response);
   }
   return lms.get_courses().then((response) =>  response);
 }
-//DICT:DEL:lms_courses (id?): Delete the given course.
+//NODICT:DEL:lms_courses (id?): Delete the given course.
 del.lms_courses = function (id) {
   return lms.delete_course(id).then((response) =>  response);
 }
-//DICT:PUT:lms_courses (json): Update an existing course for the LMS. JSON must have an id set.
+//NODICT:PUT:lms_courses (json): Update an existing course for the LMS. JSON must have an id set.
 put.lms_courses = function (json) {
   let data = json;
   try {
@@ -616,11 +621,11 @@ put.lms_courses = function (json) {
   const id = data.id;
   return lms.put_course(id, data).then((response) =>  response);
 }
-//DICT:GET:lms_courses_roster (course_id): Get a list of users in the given course.
+//NODICT:GET:lms_courses_roster (course_id): Get a list of users in the given course.
 get.lms_courses_roster = function (id) {
   return lms.get_course_roster(id).then((response) =>  response);
 }
-//DICT:PUT:lms_enroll_user (course_id, user_id, json): Enroll a user into a course. By default enrolls as student.  In JSON body set roleid to change role.
+//NODICT:PUT:lms_enroll_user (course_id, user_id, json): Enroll a user into a course. By default enrolls as student.  In JSON body set roleid to change role.
 put.lms_enroll_user = function (courseid, userid, json) {
   let data = json;
   try {
@@ -629,18 +634,18 @@ put.lms_enroll_user = function (courseid, userid, json) {
   }
   return lms.enroll_course_roster_user(courseid, userid, data).then((response) =>  response);
 }
-//DICT:DEL:lms_unenroll_user (course_id, user_id): Unenroll a user from a course.
+//NODICT:DEL:lms_unenroll_user (course_id, user_id): Unenroll a user from a course.
 del.lms_unenroll_user = function (courseid, userid) {
   return lms.unenroll_course_roster_user(courseid, userid).then((response) =>  response);
 }
-//DICT:GET:lms_users (id?): Get a list of users from the LMS. If id is supplied, get the specific user.
+//NODICT:GET:lms_users (id?): Get a list of users from the LMS. If id is supplied, get the specific user.
 get.lms_users = function (id) {
   if (id) {
     return lms.get_user(id).then((response) =>  response);
   }
   return lms.get_users().then((response) =>  response);
 }
-//DICT:POST:lms_users (json): Create a new user for the LMS
+//NODICT:POST:lms_users (json): Create a new user for the LMS
 post.lms_users = function (json) {
   let data = json;
   try {
@@ -649,7 +654,7 @@ post.lms_users = function (json) {
   }
   return lms.post_user(data).then((response) =>  response);
 }
-//DICT:PUT:lms_users (json): Update an existing user for the LMS. JSON must have an id set.
+//NODICT:PUT:lms_users (json): Update an existing user for the LMS. JSON must have an id set.
 put.lms_users = function (json) {
   let data = json;
   try {
@@ -662,7 +667,7 @@ put.lms_users = function (json) {
   const id = data.id;
   return lms.put_user(id, data).then((response) =>  response);
 }
-//DICT:DEL:lms_users (id): Delete a user from the LMS
+//NODICT:DEL:lms_users (id): Delete a user from the LMS
 del.lms_users = function (id) {
   return lms.delete_user(id).then((response) =>  response);
 }
