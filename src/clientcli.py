@@ -95,7 +95,7 @@ if (response.status_code != 200):
 try:
 	obj = response.json()
 	result = obj[u'result']
-	final = result[0]
+	final = json.dumps(result[0])
 	print (final)
 except:
 	print ("Invalid Data: " + response.text)

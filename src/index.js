@@ -48,12 +48,9 @@ app.get('/admin/api/logout', function(req,res) {
 })
 
 app.get('/admin/api/ismoodle', function(req,res) {
-	if (fs.existsSync('/var/www/moodle/index.php')) {
-		res.sendStatus(200);
-	}
-	else {
-		res.sendStatus(401);
-	}
+	var data = {code:0,result: [functions.get[req.params.key]()]};
+	logger.log('debug', `${req.method} ${req.originalUrl}: ${data.result[0]}`);
+	res.send(data);
 })
 
 app.put('/admin/api/weblog', function(req,res) {
