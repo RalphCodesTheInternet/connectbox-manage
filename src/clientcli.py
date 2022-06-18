@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 #  Provides front-end command line interface.  Requires port 5002 operating instance of connectbox-manage/src/index.js (probably in PM2)
 import requests
