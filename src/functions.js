@@ -354,6 +354,7 @@ set.coursedownload = function (json) {
 get.coursesonusb = function () {
 	var response = [];
 	try {
+		var folderPath = '/media/'
 		coursesDS.splice(0, coursesDS.length)
 		const items = fs.readdirSync(folderPath);
 		const mountPoints = items.filter(res => fs.lstatSync(path.resolve(folderPath, res)).isDirectory());
