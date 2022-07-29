@@ -330,18 +330,33 @@ doCommand.openwellrefresh = function () {
 
 //DICT:DO:openwellusb: Trigger a loading of OpenWell content from USB (/USB/package OR /USB/content semi-structured media)
 doCommand.openwellusb = function () {
-	if (fs.existsSync('/media/usb0/package/language.json')) {
-		execute('sudo rm -rf /var/www/enhanced/content/www/assets/content/*');
-		execute(`sudo ln -s /media/usb0/package/* /var/www/enhanced/content/www/assets/content/`)
-		return ('Loading Package Found at /USB/package.');
+	var folderPath = '/media/'
+	const items = fs.readdirSync(folderPath);
+	const mountPoints = items.filter(res => fs.lstatSync(path.resolve(folderPath, res)).isDirectory());
+
+	for (var i = 0; i < mountPoints.length; i++) {
+		const foldersInMountPoint = fs.readdirSync(path.resolve(folderPath, mountPoints[i]));
+
+		for (var j = 0; j < foldersInMountPoint.length; j++) {
+			if (foldersInMountPoint[j] === 'package') {
+				if (fs.existsSync(path.resolve(folderPath, mountPoints[i], foldersInMountPoint[j], 'language.json'))) {
+					var execStr = "sudo ln -s " + path.resolve(folderPath, mountPoints[i], foldersInMountPoint[j]) + "/* /var/www/enhanced/content/www/assets/content/";
+					execute('sudo rm -rf /var/www/enhanced/content/www/assets/content/*');
+					execute(execStr)
+					return ('Loading Package. CMD: ' + execStr);
+				}
+			}
+		}
+		for (var j = 0; j < foldersInMountPoint.length; j++) {
+			if (foldersInMountPoint[j] === 'content') {
+				var fullPath = path.resolve(folderPath, mountPoints[i], foldersInMountPoint[j])
+				var excStr = "sudo python3 /usr/local/connectbox/bin/enhancedInterfaceUSBLoader.py" + ' ' + fullPath + ' ' + ">/tmp/loadContent.log 2>&1"
+				exec(excStr);
+				return ('Loading content from /USB/content. CMD: ' + excStr);
+			}
+		}
 	}
-	else if (fs.existsSync('/media/usb0/content')) {
-		exec('sudo /usr/local/connectbox/bin/enhancedInterfaceUSBLoader.py >/tmp/loadContent.log 2>&1');
-		return ('Loading content from /USB/content.');
-	}
-	else {
-		return ({ status: 404, message: `No USB content found. Can't Load Anything.` })
-	}
+	return ({ status: 404, message: `No USB content found. Can't Load Anything.` });
 }
 
 //DICT:SET:coursedownload (URL): Download the Moodle course and install
@@ -381,8 +396,18 @@ get.coursesonusb = function () {
 
 //DICT:SET:courseusb (filename): Trigger a loading of Moodle content from /USB/courses
 set.courseusb = function (json) {
-	execute(`sudo -u www-data php /var/www/moodle/admin/cli/restore_backup.php -f="/media/usb0/courses/${json.value}" -c=1 >/tmp/loadContent.log 2>&1`);
-	return true;
+	var coursePath = "";
+	coursesDS.forEach(course => {
+		if (course.name == json.value) {
+			coursePath = course.path;
+		}
+	});
+	if (coursePath === "") {
+		return ({ status: 404, message: `Something went wrong. CoursePath = is empty. Not Found in CoursesDS` });
+	} else {
+		execute(`sudo -u www-data php /var/www/moodle/admin/cli/restore_backup.php -f="${coursePath}" -c=1 >/tmp/loadContent.log 2>&1`);
+		return true;
+	}
 }
 
 //DICT:SET:wipe (password): Erase SD Card -- password is wipethebox
