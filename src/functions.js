@@ -51,9 +51,24 @@ get.boxid = function () {
 	return (execute(`cat /sys/class/net/eth0/address`).replace(/:/g, '-').replace('\n', ''));
 }
 
+function getWifiSetting(name) {
+    fs.readFile('/usr/bin/router/settings.txt', 'utf8', function (err, data) {
+        if (err) throw err;
+        var settings = data.split("\n");
+        
+        for(var i=0; i < settings.length; i++){
+            var pair = settings[i].split("=");
+            if(pair[0]===name){
+                return pair[1];
+            }
+        }
+
+    });
+}
+
 //DICT:GET:apssid: Access Point SSID
 get.apssid = function () {
-	return (execute(`grep '^ssid=' /etc/hostapd/hostapd.conf | cut -d"=" -f2`))
+	return getWifiSetting('SSID')
 }
 //DICT:SET:apssid (string): Access Point SSID
 set.apssid = function (json) {
@@ -343,7 +358,7 @@ doCommand.openwellusb = function () {
 					var execStr = "sudo ln -s " + path.resolve(folderPath, mountPoints[i], foldersInMountPoint[j]) + "/* /var/www/enhanced/content/www/assets/content/";
 					execute('sudo rm -rf /var/www/enhanced/content/www/assets/content/*');
 					execute(execStr)
-					return ('Loading Package. CMD: ' + execStr);
+					return ('Loading Package CMD: ' + execStr);
 				}
 			}
 		}
