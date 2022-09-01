@@ -9,6 +9,7 @@ const
 	Logger = require('./logger.js'),
 	logger = new Logger(configs.logging);
 
+const { rejects } = require('assert');
 const path = require("path")
 
 var coursesDS = [];
@@ -51,60 +52,46 @@ get.boxid = function () {
 	return (execute(`cat /sys/class/net/eth0/address`).replace(/:/g, '-').replace('\n', ''));
 }
 
-function getWifiSetting(name) {
-    fs.readFile('/usr/bin/router/settings.txt', 'utf8', function (err, data) {
-        if (err) throw err;
-        var settings = data.split("\n");
-        
-        for(var i=0; i < settings.length; i++){
-            var pair = settings[i].split("=");
-            if(pair[0]===name){
-                return pair[1];
-            }
-        }
-
-    });
-}
 
 //DICT:GET:apssid: Access Point SSID
 get.apssid = function () {
-	return getWifiSetting('SSID')
+	return (execute(`grep '^SSID=' /usr/bin/router/startup.sh | cut -d"=" -f2`))
 }
 //DICT:SET:apssid (string): Access Point SSID
 set.apssid = function (json) {
-	return (execute(`sudo sed -i -e "/^ssid=/ s/=.*/=${json.value}/" /etc/hostapd/hostapd.conf`))
+	return (execute(`sudo sed -i -e "/^SSID=/ s/=.*/=${json.value}/" /usr/bin/router/startup.sh`))
 }
 
 //DICT:GET:appassphrase: Access Point WPA passphrase
 get.appassphrase = function () {
-	return (execute(`grep '^wpa_passphrase=' /etc/hostapd/hostapd.conf | cut -d"=" -f2`))
+	return (execute(`grep '^Password=' /usr/bin/router/startup.sh | cut -d"=" -f2`))
 }
 //DICT:SET:appassphrase (string): Access Point WPA passphrase
 set.appassphrase = function (json) {
 	if (json.value.length >= 8) {
 		// Check to see if the line is in hostapd.conf before writing
-		if (execute(`cat /etc/hostapd/hostapd.conf |grep wpa_passphrase= |wc -l`) == 0) {
+		if (execute(`cat  /usr/bin/router/startup.sh |grep Password= |wc -l`) == 0) {
 			// Write new value (previous state was no WPA)
-			return (execute(`echo 'wpa_passphrase=${json.value}' | sudo tee -a /etc/hostapd/hostapd.conf >/dev/null`));
+			return (execute(`echo 'Password=${json.value}' | sudo tee -a  /usr/bin/router/startup.sh >/dev/null`));
 		}
 		else {
 			// Modify existing passphrase
-			return (execute(`sudo sed -i -e "/wpa_passphrase=/ s/=.*/=\"${json.value}\"/" /etc/hostapd/hostapd.conf`))
+			return (execute(`sudo sed -i -e "/Password=/ s/=.*/=\"${json.value}\"/"  /usr/bin/router/startup.sh`))
 		}
 	}
 	else {
 		// Remove existing passphrase
-		return (execute(`sudo sed -i -e "/wpa_passphrase=/ s/wpa_passphrase=.*//" /etc/hostapd/hostapd.conf`))
+		return (execute(`sudo sed -i -e "/Password=/ s/Password=.*//"  /usr/bin/router/startup.sh`))
 	}
 }
 
 //DICT:GET:apchannel: Access Point Wi-Fi Channel
 get.apchannel = function () {
-	return (execute(`grep '^channel=' /etc/hostapd/hostapd.conf | cut -d"=" -f2`))
+	return (execute(`grep '^Channel=' /usr/bin/router/startup.sh | cut -d"=" -f2`))
 }
 //DICT:SET:apchannel (integer): Access Point Wi-Fi Channel
 set.apchannel = function (json) {
-	return (execute(`sudo sed -i -e "/channel=/ s/=.*/=\"${json.value}\"/" /etc/hostapd/hostapd.conf`))
+	return (execute(`sudo sed -i -e "/Channel=/ s/=.*/=\"${json.value}\"/"  /usr/bin/router/startup.sh`))
 }
 
 //DICT:GET:clientwifiscan: Scan for Available Networks
