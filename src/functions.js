@@ -96,25 +96,37 @@ set.apchannel = function (json) {
 
 //DICT:GET:clientwifiscan: Scan for Available Networks
 get.clientwifiscan = function () {
-	var types = { 'on': true, 'off': false };
-	var response = [];
-	var output = execute(`sudo iwlist wlan1 scan`);
-	for (var outputRecord of output.split(' - Address:')) {
-		var record = {};
-		for (var line of outputRecord.split('\n')) {
-			line = line.trim();
-			var [key, val] = line.split(':');
-			if (key === 'ESSID') {
-				record.ssid = val.replace(/\"/g, "");
-			}
-			if (key === 'Encryption key') {
-				record.encryption = types[val];
-			}
-		}
-		if (record.ssid && record.ssid.length > 0) {
-			response.push(record);
-		}
-	}
+	var interfaces = execSync(`iw dev | awk '$1=="Interface"{print $2}'`).toString().split("\n");
+    var selectedInterface = "";
+    for (var i = 0; i < interfaces.length; i++) {
+        if (interfaces[i] !== 'wlan0' && interfaces[i] !== '') {
+            selectedInterface = interfaces[i];
+            break;
+        }
+    }
+    if (selectedInterface !== '') {
+        var types = { 'on': true, 'off': false };
+        var response = [];
+        var output = execute(`sudo iwlist ${selectedInterface} scan`);
+        for (var outputRecord of output.split(' - Address:')) {
+            var record = {};
+            for (var line of outputRecord.split('\n')) {
+                line = line.trim();
+                var [key, val] = line.split(':');
+                if (key === 'ESSID') {
+                    record.ssid = val.replace(/\"/g, "");
+                }
+                if (key === 'Encryption key') {
+                    record.encryption = types[val];
+                }
+            }
+            if (record.ssid && record.ssid.length > 0) {
+                response.push(record);
+            }
+        }
+    }else{
+        response = []
+    }
 	return (response);
 }
 
