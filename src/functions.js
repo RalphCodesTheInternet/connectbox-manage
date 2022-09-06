@@ -151,11 +151,11 @@ set.clientpassphrase = function (json){
 
 //DICT:GET:clientcountry: Client Wi-Fi Wi-Fi Country Support
 get.clientcountry = function (){
-	return (execute(`grep 'country=' /etc/wpa_supplicant/wpa_supplicant.conf | cut -d"=" -f2`))
+	return (execute(`grep 'clientCountryCode=' /usr/bin/router/clientWifi.sh | cut -d"=" -f2`))
 }
 //DICT:SET:clientcountry(2 letter country code): Client Wi-Fi Wi-Fi Country Support
 set.clientcountry = function (json){
-	execute(`sudo sed -i -e "/country_code=/ s/=.*/=${json.value}/" /etc/hostapd/hostapd.conf`)
+	execute(`sudo sed -i -e "/clientCountryCode=/ s/=.*/=${json.value}/" /usr/bin/router/clientWifi.sh`)
 	return (execute(`sudo sed -i -e "/ClientCountryCode=/ s/=.*/=\"${json.value}\"/" /usr/bin/router/clientWifi.sh`))
 }
 
