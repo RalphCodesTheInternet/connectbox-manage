@@ -15,6 +15,8 @@ const path = require("path")
 
 var coursesDS = [];
 
+var clientWifiInterfaceName = ""; 
+
 var get = {};
 var post = {};
 var put = {};
@@ -95,17 +97,17 @@ set.apchannel = function (json) {
 //DICT:GET:clientwifiscan: Scan for Available Networks
 get.clientwifiscan = function () {
 	var interfaces = execSync(`iw dev | awk '$1=="Interface"{print $2}'`).toString().split("\n");
-    var selectedInterface = "";
+    clientWifiInterfaceName = "";
     for (var i = 0; i < interfaces.length; i++) {
         if (interfaces[i] !== 'wlan0' && interfaces[i] !== '') {
-            selectedInterface = interfaces[i];
+            clientWifiInterfaceName = interfaces[i];
             break;
         }
     }
-    if (selectedInterface !== '') {
+    if (clientWifiInterfaceName !== '') {
         var types = { 'on': true, 'off': false };
         var response = [];
-        var output = execute(`sudo iwlist ${selectedInterface} scan`);
+        var output = execute(`sudo iwlist ${clientWifiInterfaceName} scan`);
         for (var outputRecord of output.split(' - Address:')) {
             var record = {};
             for (var line of outputRecord.split('\n')) {
@@ -130,20 +132,20 @@ get.clientwifiscan = function () {
 
 //DICT:GET:clientssid: Client Wi-Fi SSID
 get.clientssid = function (){
-	return (execute(`grep 'ssid' /etc/wpa_supplicant/wpa_supplicant.conf | cut -d'"' -f2`))
+	return (execute(`nmcli -t -f active,ssid dev wifi | egrep '^yes' | cut -d\: -f2`))
 }
 //DICT:SET:clientssid (string): Client Wi-Fi SSID
 set.clientssid = function (json){
-	return (execute(`sudo sed -i -e "/ssid=/ s/=.*/=\\\"${json.value}\\\"/" /etc/wpa_supplicant/wpa_supplicant.conf`))
+	return (execute(`sudo sed -i -e "/clientSSID=/ s/=.*/=\\\"${json.value}\\\"/" /usr/bin/router/clientWifi.sh`))
 }
 
 //DICT:GET:clientpassphrase: Client Wi-Fi WPA Passphrase
 get.clientpassphrase = function (){
-	return (execute(`grep 'psk' /etc/wpa_supplicant/wpa_supplicant.conf | cut -d'"' -f2`))
+	return (execute(`nmcli dev wifi show-password | egrep '^Password: ' | cut -d\: -f2`))
 }
 //DICT:SET:clientpassphrase (string): Client Wi-Fi WPA Passphrase
 set.clientpassphrase = function (json){
-	return (execute(`sudo sed -i -e "/psk=/ s/=.*/=\\\"${json.value}\\\"/" /etc/wpa_supplicant/wpa_supplicant.conf`))
+	return (execute(`sudo sed -i -e "/ClientPassword=/ s/=.*/=\\\"${json.value}\\\"/" /usr/bin/router/clientWifi.sh`))
 }
 
 //DICT:GET:clientcountry: Client Wi-Fi Wi-Fi Country Support
@@ -153,29 +155,30 @@ get.clientcountry = function (){
 //DICT:SET:clientcountry(2 letter country code): Client Wi-Fi Wi-Fi Country Support
 set.clientcountry = function (json){
 	execute(`sudo sed -i -e "/country_code=/ s/=.*/=${json.value}/" /etc/hostapd/hostapd.conf`)
-	return (execute(`sudo sed -i -e "/country=/ s/=.*/=\"${json.value}\"/" /etc/wpa_supplicant/wpa_supplicant.conf`))
+	return (execute(`sudo sed -i -e "/ClientCountryCode=/ s/=.*/=\"${json.value}\"/" /usr/bin/router/clientWifi.sh`))
 }
 
 //DICT:GET:connectedclients: Count of devices connected to access point
 get.connectedclients = function (){
-	var wifi = {"accesspoint":"wlan1","client":"wlan0"};  // Defaults
-	if (fs.existsSync('/usr/local/connectbox/wificonf.txt')) {
-		wifi.accesspoint = execute(`grep 'AccessPointIF' /usr/local/connectbox/wificonf.txt | cut -d"=" -f2`);
-		wifi.client = execute(`grep 'ClientIF' /usr/local/connectbox/wificonf.txt | cut -d"=" -f2`);
-	}
-	return (execute(`iw ${wifi.accesspoint} station dump |grep Station |wc -l | awk '{$1=$1};1'`))
+	return (execute(`sudo bash /usr/bin/router/router.sh --lc wlan0 | grep 192.168 | awk '!a[$0]++{u[$1]++}END{for (k in u) print k,u[k]}' | wc -l`))
 }
 
 //DICT:GET:clientwificonnection: Show status of client wifi
 get.clientwificonnection = function (){
-	var wifi = {"accesspoint":"wlan1","client":"wlan0"};  // Defaults
-	if (fs.existsSync('/usr/local/connectbox/wificonf.txt')) {
-		wifi.accesspoint = execute(`grep 'AccessPointIF' /usr/local/connectbox/wificonf.txt | cut -d"=" -f2`);
-		wifi.client = execute(`grep 'ClientIF' /usr/local/connectbox/wificonf.txt | cut -d"=" -f2`);
+	var interfaces = execSync(`iw dev | awk '$1=="Interface"{print $2}'`).toString().split("\n");
+    clientWifiInterfaceName = "";
+    for (var i = 0; i < interfaces.length; i++) {
+        if (interfaces[i] !== 'wlan0' && interfaces[i] !== '') {
+            clientWifiInterfaceName = interfaces[i];
+            break;
+        }
+    }
+	var text = execute(`nmcli connection show --active | grep ${clientWifiInterfaceName}`)
+	if(text.length > 1){
+		return ('Connected');
+	}else{
+		return ('Offline');
 	}
-	var text = ['Offline','Connected'];
-	var response = text[execute(`iwconfig ${wifi.client} | grep 'Link Quality' |wc -l`)] || "Error: Device Not Found";
-	return (response);
 }
 
 //DICT:SET:wifirestart(interface): Client Wi-Fi Wi-Fi Country Support
