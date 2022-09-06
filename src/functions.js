@@ -176,6 +176,7 @@ get.clientwificonnection = function (){
     }
 	var text = execute(`nmcli connection show --active | grep ${clientWifiInterfaceName}`)
 	if(text.length > 1){
+		if(text.includes('Error')){return ('Offline')}
 		return ('Connected');
 	}else{
 		return ('Offline');
@@ -193,7 +194,7 @@ set.wifirestart = function (json){
         }
     }
 	execute(`sudo sed -i -e "/ClientInterface=/ s/=.*/=\\\"${clientWifiInterfaceName}\\\"/" /usr/bin/router/clientWifi.sh`);
-	response = execute(`sudo bash /usr/bin/router/clientWifi.sh`);
+	var response = execute(`sudo bash /usr/bin/router/clientWifi.sh`);
 	return (response);
 }
 
