@@ -11,6 +11,7 @@ const
 
 var brand = JSON.parse(fs.readFileSync('/usr/local/connectbox/brand.txt'));
 
+const { response } = require('express');
 const path = require("path")
 
 var coursesDS = [];
@@ -136,7 +137,7 @@ get.clientssid = function (){
 }
 //DICT:SET:clientssid (string): Client Wi-Fi SSID
 set.clientssid = function (json){
-	return (execute(`sudo sed -i -e "/clientSSID=/ s/=.*/=\\\"${json.value}\\\"/" /usr/bin/router/clientWifi.sh`))
+	return (execute(`sudo sed -i -e "/ClientSSID=/ s/=.*/=\\\"${json.value}\\\"/" /usr/bin/router/clientWifi.sh`))
 }
 
 //DICT:GET:clientpassphrase: Client Wi-Fi WPA Passphrase
@@ -183,19 +184,16 @@ get.clientwificonnection = function (){
 
 //DICT:SET:wifirestart(interface): Client Wi-Fi Wi-Fi Country Support
 set.wifirestart = function (json){
-	// This provides the interface information for each wifi interface
-	var wifi = {"accesspoint":"wlan1","client":"wlan0"};  // Defaults
-	if (fs.existsSync('/usr/local/connectbox/wificonf.txt')) {
-		wifi.accesspoint = execute(`grep 'AccessPointIF' /usr/local/connectbox/wificonf.txt | cut -d"=" -f2`);
-		wifi.client = execute(`grep 'ClientIF' /usr/local/connectbox/wificonf.txt | cut -d"=" -f2`);
-	}
-	// Now do the update
-	var interface = wifi[json.value];
-	var response = execute(`sudo ifdown ${interface} && sleep 1 && sudo ifup ${interface}`);
-	if (json.value === 'accesspoint') {
-		response += execute(`sudo systemctl restart hostapd`);
-		response += execute(`sudo systemctl status hostapd`);
-	}
+	var interfaces = execSync(`iw dev | awk '$1=="Interface"{print $2}'`).toString().split("\n");
+    clientWifiInterfaceName = "";
+    for (var i = 0; i < interfaces.length; i++) {
+        if (interfaces[i] !== 'wlan0' && interfaces[i] !== '') {
+            clientWifiInterfaceName = interfaces[i];
+            break;
+        }
+    }
+	execute(`sudo sed -i -e "/ClientInterface=/ s/=.*/=\\\"${clientWifiInterfaceName}\\\"/" /usr/bin/router/clientWifi.sh`);
+	response = execute(`sudo bash /usr/bin/router/clientWifi.sh`);
 	return (response);
 }
 
