@@ -100,7 +100,7 @@ get.clientwifiscan = function () {
 	var interfaces = execSync(`iw dev | awk '$1=="Interface"{print $2}'`).toString().split("\n");
 	clientWifiInterfaceName = "";
 	for (var i = 0; i < interfaces.length; i++) {
-		if (interfaces[i] !== 'wlan0' && interfaces[i] !== '') {
+		if (interfaces[i] !== 'wlan0' && interfaces[i] !== 'wlan1' && interfaces[i] !== '') {
 			clientWifiInterfaceName = interfaces[i];
 			break;
 		}
@@ -165,7 +165,15 @@ set.clientcountry = function (json) {
 
 //DICT:GET:connectedclients: Count of devices connected to access point
 get.connectedclients = function () {
-	return (execute(`sudo bash /usr/bin/router/router.sh --lc wlan0 | grep 192.168 | awk '!a[$0]++{u[$1]++}END{for (k in u) print k,u[k]}' | wc -l`))
+	var interfaces = execSync(`iw dev | awk '$1=="Interface"{print $2}'`).toString().split("\n");
+	var APWifiInterfaceName = "";
+	for (var i = 0; i < interfaces.length; i++) {
+		if (interfaces[i] === 'wlan0' || interfaces[i] === 'wlan1' && interfaces[i] !== '') {
+			APWifiInterfaceName = interfaces[i];
+			break;
+		}
+	}
+	return (execute(`sudo bash /usr/bin/router/router.sh --lc ${APWifiInterfaceName} | grep 192.168 | awk '!a[$0]++{u[$1]++}END{for (k in u) print k,u[k]}' | wc -l`))
 }
 
 //DICT:GET:clientwificonnection: Show status of client wifi
@@ -173,7 +181,7 @@ get.clientwificonnection = function () {
 	var interfaces = execSync(`iw dev | awk '$1=="Interface"{print $2}'`).toString().split("\n");
 	clientWifiInterfaceName = "";
 	for (var i = 0; i < interfaces.length; i++) {
-		if (interfaces[i] !== 'wlan0' && interfaces[i] !== '') {
+		if (interfaces[i] !== 'wlan0' && interfaces[i] !== 'wlan1' && interfaces[i] !== '') {
 			clientWifiInterfaceName = interfaces[i];
 			break;
 		}
@@ -192,7 +200,7 @@ set.wifirestart = function (json) {
 	var interfaces = execSync(`iw dev | awk '$1=="Interface"{print $2}'`).toString().split("\n");
 	clientWifiInterfaceName = "";
 	for (var i = 0; i < interfaces.length; i++) {
-		if (interfaces[i] !== 'wlan0' && interfaces[i] !== '') {
+		if (interfaces[i] !== 'wlan0' && interfaces[i] !== 'wlan1' && interfaces[i] !== '') {
 			clientWifiInterfaceName = interfaces[i];
 			break;
 		}
